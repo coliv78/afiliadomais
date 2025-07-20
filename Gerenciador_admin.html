@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Produtos Local - Minha Loja Afiliada</title>
+    
+    <!-- Inclui o CDN do Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuração do Tailwind para usar a fonte Inter e cores personalizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#6B7280',
+                        background: '#F9FAFB',
+                        card: '#FFFFFF',
+                        border: '#E5E7EB',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Importa a fonte 'Inter' do Google Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Estilos específicos para a área de drag-and-drop */
+        .drop-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .drop-area.highlight {
+            background-color: #e0e7ff; /* Cor de destaque ao arrastar */
+            border-color: #4F46E5;
+        }
+        .product-image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: contain;
+            margin: 10px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="font-sans bg-background text-gray-800 antialiased">
+
+    <!-- Cabeçalho da Página (simplificado para admin local) -->
+    <header class="bg-primary text-white shadow-lg py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold rounded-lg p-2">Minha Loja - Admin Local</h1>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="index.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Início do Site</a></li>
+                    <li><a href="admin-produtos-local.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Gerenciador Local</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Seção de Gerenciamento de Produtos Local -->
+    <section class="admin-section bg-card py-10 px-4 shadow-md rounded-lg mx-auto mt-8 max-w-5xl">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Gerenciar Produtos (Localmente)</h2>
+
+            <!-- AVISO IMPORTANTE SOBRE PERSISTÊNCIA DE DADOS -->
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+                <p class="font-bold">Atenção: Dados Locais!</p>
+                <p class="text-sm">As alterações feitas aqui são armazenadas **apenas neste navegador** e **não serão salvas na nuvem**. Se você limpar o cache do navegador, usar outro dispositivo ou navegador, os dados serão perdidos. As alterações **NÃO** serão refletidas no seu site público para outros visitantes.</p>
+                <p class="text-sm mt-2">Para imagens, este gerenciador armazena **apenas o caminho/URL**. Você deve **manualmente colocar os arquivos de imagem** na pasta `images/` (ou outra pasta que você especificar) ao lado dos seus arquivos HTML para que elas apareçam no site.</p>
+                <p class="text-sm mt-2 font-bold">Funcionalidade de Download de Imagens da Web:</p>
+                <p class="text-sm">Ao inserir uma URL de imagem da web, um botão "Baixar Imagem" aparecerá. Ao clicar nele, a imagem será baixada para a pasta de downloads padrão do seu navegador. **Não é possível selecionar uma pasta específica no seu PC para salvar as imagens diretamente através do navegador por motivos de segurança.** Em alguns casos, o navegador pode abrir a imagem em uma nova aba em vez de baixar, dependendo das configurações do servidor de origem da imagem.</p>
+            </div>
+
+            <!-- Mensagens de feedback -->
+            <div id="feedbackMessage" class="mt-4 p-3 rounded-md text-sm hidden"></div>
+
+            <!-- Formulário para Adicionar/Editar Produto -->
+            <div class="mb-10 p-6 border border-border rounded-lg shadow-sm">
+                <h3 class="text-2xl font-semibold text-primary mb-6 text-center" id="formTitle">Adicionar Novo Produto</h3>
+                <form id="productForm" class="space-y-4">
+                    <input type="hidden" id="productId" name="productId" value="">
+                    <!-- productImageUrl hidden input is no longer used for Base64, can be removed or ignored -->
+                    <!-- <input type="hidden" id="productImageUrl" name="productImageUrl" value=""> --> 
+
+                    <div>
+                        <label for="productName" class="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
+                        <input type="text" id="productName" name="productName" required
+                               class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="productDescription" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                        <textarea id="productDescription" name="productDescription" rows="3" required
+                                  class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                    </div>
+                    <div>
+                        <label for="productPrice" class="block text-sm font-medium text-gray-700 mb-1">Preço (R$)</label>
+                        <input type="number" id="productPrice" name="productPrice" step="0.01" required
+                               class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+
+                    <!-- Novo campo para seleção de categoria -->
+                    <div>
+                        <label for="productCategory" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                        <select id="productCategory" name="productCategory" required
+                                class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="">Selecione uma categoria</option>
+                            <option value="eletronicos">Eletrônicos</option>
+                            <option value="moda">Moda</option>
+                            <option value="casa">Casa</option>
+                            <option value="beleza">Beleza</option>
+                            <option value="esporte">Esporte</option>
+                            <option value="brinquedos">Brinquedos</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+
+                    <!-- Novo campo para o Link do Fornecedor -->
+                    <div>
+                        <label for="supplierLink" class="block text-sm font-medium text-gray-700 mb-1">Link do Fornecedor (URL de Compra)</label>
+                        <input type="url" id="supplierLink" name="supplierLink" 
+                               class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                               placeholder="https://link.do.fornecedor.com/produto" required>
+                        <p class="text-xs text-gray-500 mt-1">Este link será usado no botão 'Comprar Agora' na página de detalhes do produto.</p>
+                    </div>
+
+                    <!-- Campo para URL da Imagem Principal (NOVO) -->
+                    <div class="mt-6">
+                        <label for="mainImageUrlInput" class="block text-sm font-medium text-gray-700 mb-2">URL da Imagem Principal do Produto</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="url" id="mainImageUrlInput" name="mainImageUrlInput" 
+                                   class="flex-grow p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ex: images/nome-da-imagem.jpg OU https://sua-imagem.com/imagem.jpg">
+                            <button type="button" id="downloadMainImageBtn"
+                                    class="bg-blue-500 text-white px-4 py-3 rounded-md font-semibold hover:bg-blue-600 transition-colors duration-300 shadow-md hidden">
+                                Baixar Imagem
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Insira a URL completa (para imagens da web) ou o caminho relativo (para imagens locais, ex: `images/minha-foto.jpg`).</p>
+                    </div>
+
+                    <!-- Área de Upload de Imagem Principal (Drag-and-Drop) - AGORA SUGERE O CAMINHO -->
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ou Selecione um Arquivo Local para Sugerir o Caminho</label>
+                        <div id="dropArea" class="drop-area bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                            <p class="text-gray-600">Arraste e solte um arquivo de imagem aqui ou clique para selecionar</p>
+                            <input type="file" id="fileInput" accept="image/*" class="hidden">
+                            <img id="imagePreview" src="" alt="Pré-visualização da Imagem Principal" class="product-image-preview hidden">
+                            <p id="uploadProgress" class="text-sm text-gray-500 mt-2 hidden">Progresso: 0%</p>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Ao selecionar um arquivo, o campo "URL da Imagem Principal" será preenchido com um caminho sugerido (`images/nome-do-arquivo.ext`). **Lembre-se de mover o arquivo real para a pasta `images/`!**</p>
+                    </div>
+
+                    <!-- Campo para URLs de Imagens Adicionais -->
+                    <div class="mt-6">
+                        <label for="additionalImages" class="block text-sm font-medium text-gray-700 mb-1">URLs de Imagens Adicionais (separadas por vírgula)</label>
+                        <textarea id="additionalImages" name="additionalImages" rows="4"
+                                  class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                  placeholder="Cole as URLs das imagens adicionais aqui, separadas por vírgula (Ex: images/foto2.jpg, https://outrosite.com/foto3.png)"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Insira URLs completas ou caminhos relativos para imagens adicionais. **Lembre-se de mover os arquivos locais para a pasta `images/`!** Para baixar imagens da web, copie a URL e cole no seu navegador para salvar manualmente.</p>
+                    </div>
+
+                    <button type="submit" id="saveProductBtn"
+                            class="w-full bg-primary text-white py-3 rounded-md font-semibold hover:bg-indigo-600 transition-colors duration-300 shadow-md">
+                        Salvar Produto
+                    </button>
+                    <button type="button" id="cancelEditBtn"
+                            class="w-full bg-gray-300 text-gray-800 py-3 rounded-md font-semibold hover:bg-gray-400 transition-colors duration-300 shadow-md mt-2 hidden">
+                        Cancelar Edição
+                    </button>
+                </form>
+            </div>
+
+            <!-- Seção de Busca de Produtos Existentes -->
+            <section class="search-section bg-card py-6 px-4 shadow-md rounded-lg mx-auto mt-8 max-w-4xl">
+                <div class="container mx-auto text-center flex items-center justify-center space-x-4">
+                    <input
+                        type="text"
+                        id="productSearchInput"
+                        placeholder="Buscar produtos cadastrados..."
+                        class="w-full max-w-xl p-4 text-lg border border-border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
+                    />
+                    <button id="searchProductBtn"
+                            class="bg-primary text-white px-6 py-4 rounded-full font-semibold hover:bg-indigo-600 transition-colors duration-300 shadow-md">
+                        Buscar
+                    </button>
+                </div>
+            </section>
+
+            <!-- Lista de Produtos Existentes -->
+            <div class="mt-10 p-6 border border-border rounded-lg shadow-sm">
+                <h3 class="text-2xl font-semibold text-primary mb-6 text-center">Produtos Existentes</h3>
+                <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Produtos serão carregados aqui via JavaScript -->
+                    <p id="noProductsMessage" class="text-center text-gray-500 col-span-full">Nenhum produto cadastrado ainda.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rodapé da Página -->
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-sm">&copy; 2025 Minha Loja Afiliada. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Modal de Confirmação de Exclusão (Customizado) -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full text-center">
+            <h3 class="text-xl font-semibold mb-4">Confirmar Exclusão</h3>
+            <p class="mb-6">Tem certeza que deseja excluir este produto?</p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirmDeleteBtn" class="bg-red-500 text-white px-5 py-2 rounded-md hover:bg-red-600 transition-colors duration-300">
+                    Excluir
+                </button>
+                <button id="cancelDeleteBtn" class="bg-gray-300 text-gray-800 px-5 py-2 rounded-md hover:bg-gray-400 transition-colors duration-300">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Referências a elementos do DOM
+        const feedbackMessageDiv = document.getElementById('feedbackMessage');
+        const productForm = document.getElementById('productForm');
+        const productIdInput = document.getElementById('productId');
+        const productNameInput = document.getElementById('productName');
+        const productDescriptionInput = document.getElementById('productDescription');
+        const productPriceInput = document.getElementById('productPrice');
+        const productCategoryInput = document.getElementById('productCategory');
+        const supplierLinkInput = document.getElementById('supplierLink');
+        
+        const mainImageUrlInput = document.getElementById('mainImageUrlInput'); 
+        const downloadMainImageBtn = document.getElementById('downloadMainImageBtn'); 
+        // productImageUrlInput (hidden) is no longer directly used for storage, but can remain if needed for other logic
+        const productImageUrlInput = document.getElementById('productImageUrl'); 
+
+        const additionalImagesInput = document.getElementById('additionalImages');
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const productListDiv = document.getElementById('productList');
+        const noProductsMessage = document.getElementById('noProductsMessage');
+        const formTitle = document.getElementById('formTitle');
+        const saveProductBtn = document.getElementById('saveProductBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+        const productSearchInput = document.getElementById('productSearchInput');
+        const searchProductBtn = document.getElementById('searchProductBtn');
+
+        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+
+        let currentEditingProductId = null; 
+
+        // Função para exibir mensagens de feedback
+        function showFeedback(message, type = 'success') {
+            feedbackMessageDiv.textContent = message;
+            feedbackMessageDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+            if (type === 'success') {
+                feedbackMessageDiv.classList.add('bg-green-100', 'text-green-700');
+            } else if (type === 'error') {
+                feedbackMessageDiv.classList.add('bg-red-100', 'text-red-700');
+            } else { // info
+                feedbackMessageDiv.classList.add('bg-blue-100', 'text-blue-700');
+            }
+            setTimeout(() => {
+                feedbackMessageDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // --- Gerenciamento de Imagens (Local - APENAS CAMINHOS/URLS) ---
+
+        // Funções para Drag and Drop
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('highlight');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('highlight');
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('highlight');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // Abre o seletor de arquivos ao clicar na área de drop
+        dropArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Lida com a seleção de arquivo via input
+        fileInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // Função principal para lidar com o arquivo selecionado/arrastado (AGORA SUGERE O CAMINHO)
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showFeedback("Por favor, selecione um arquivo de imagem.", 'error');
+                return;
+            }
+
+            // Apenas sugere o caminho local, não faz upload real nem converte para Base64 para armazenamento
+            const suggestedPath = `images/${file.name}`; 
+            mainImageUrlInput.value = suggestedPath; // Preenche o campo de URL principal
+            imagePreview.src = suggestedPath; // Tenta exibir a imagem do caminho sugerido
+            imagePreview.classList.remove('hidden');
+            uploadProgress.classList.add('hidden'); // Esconde o progresso, pois não há upload real
+            downloadMainImageBtn.classList.add('hidden'); // Oculta o botão de download para arquivos locais
+            showFeedback(`Caminho da imagem principal sugerido: "${suggestedPath}". Lembre-se de mover o arquivo real para a pasta 'images/'.`, 'info');
+        }
+
+        // NOVO: Função para lidar com o download de imagens
+        function downloadImage(imageUrl) {
+            if (!imageUrl) {
+                showFeedback("Nenhuma URL de imagem para baixar.", 'error');
+                return;
+            }
+
+            // Verifica se a URL é de uma imagem local (caminho relativo)
+            if (!(imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+                showFeedback("O download direto é apenas para imagens da web (URL completa). Para imagens locais, clique com o botão direito e 'Salvar Imagem Como...'.", 'info');
+                return;
+            }
+
+            const a = document.createElement('a');
+            a.href = imageUrl;
+            
+            // Tenta extrair o nome do arquivo da URL, caso contrário, usa um nome genérico
+            const url = new URL(imageUrl);
+            const pathSegments = url.pathname.split('/');
+            let filename = pathSegments[pathSegments.length - 1];
+            if (!filename || filename.indexOf('.') === -1) { 
+                // Se não tiver nome ou extensão, tenta adivinhar uma extensão comum ou usa .png
+                filename = 'downloaded_image.png'; 
+                if (imageUrl.includes('.jpg')) filename = 'downloaded_image.jpg';
+                else if (imageUrl.includes('.jpeg')) filename = 'downloaded_image.jpeg';
+                else if (imageUrl.includes('.gif')) filename = 'downloaded_image.gif';
+                else if (imageUrl.includes('.webp')) filename = 'downloaded_image.webp';
+            }
+            a.download = filename; 
+            
+            document.body.appendChild(a);
+            a.click(); 
+            document.body.removeChild(a); 
+            showFeedback("Download da imagem iniciado (verifique sua pasta de downloads).", 'info');
+        }
+
+        // NOVO: Event listener para o botão de download
+        downloadMainImageBtn.addEventListener('click', () => {
+            downloadImage(mainImageUrlInput.value);
+        });
+
+        // NOVO: Event listener para o campo de URL da imagem principal para mostrar/ocultar o botão de download e pré-visualização
+        mainImageUrlInput.addEventListener('input', () => {
+            const imageUrl = mainImageUrlInput.value.trim();
+            if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+                downloadMainImageBtn.classList.remove('hidden');
+                imagePreview.src = imageUrl;
+                imagePreview.classList.remove('hidden');
+            } else {
+                downloadMainImageBtn.classList.add('hidden');
+                imagePreview.classList.add('hidden'); // Oculta a pré-visualização se não for uma URL da web
+                imagePreview.src = '';
+            }
+        });
+
+
+        // --- Gerenciamento de Produtos (Local Storage) ---
+
+        const LOCAL_STORAGE_KEY = 'minhaLojaProdutos';
+
+        // Carrega os produtos do localStorage, com opção de filtro por termo de busca
+        function loadProducts(searchTerm = '') {
+            const products = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+            productListDiv.innerHTML = ''; // Limpa a lista
+
+            // Filtra os produtos com base no termo de busca
+            const filteredProducts = products.filter(product => 
+                product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+
+            if (filteredProducts.length === 0) {
+                noProductsMessage.classList.remove('hidden');
+                return;
+            } else {
+                noProductsMessage.classList.add('hidden');
+            }
+
+            filteredProducts.forEach(product => {
+                const productCardHtml = `
+                    <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center text-center">
+                        <img src="${product.imageUrl || 'https://placehold.co/100x100/E5E7EB/6B7280?text=Sem+Imagem'}" 
+                             alt="${product.name}" class="w-24 h-24 object-cover rounded-md mb-4">
+                        <h4 class="text-lg font-semibold mb-1">${product.name}</h4>
+                        <p class="text-sm text-secondary mb-2 line-clamp-2">${product.description}</p>
+                        <p class="text-xs text-gray-500 mb-2">Categoria: ${product.category || 'N/A'}</p>
+                        <p class="text-xl font-bold text-primary mb-4">R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</p>
+                        <div class="flex space-x-2">
+                            <a href="produto-detalhe-local.html?id=${product.id}" 
+                               class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors duration-300">
+                                Ver Detalhes
+                            </a>
+                            <button data-id="${product.id}"
+                                    class="edit-btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300">
+                                Editar
+                            </button>
+                            <button data-id="${product.id}"
+                                    class="delete-btn bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors duration-300">
+                                Excluir
+                            </button>
+                        </div>
+                    </div>
+                `;
+                productListDiv.insertAdjacentHTML('beforeend', productCardHtml);
+            });
+
+            // Adiciona event listeners para os botões de Editar e Excluir
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => editProduct(e.target.dataset.id));
+            });
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => showDeleteConfirmModal(e.target.dataset.id));
+            });
+        }
+
+        // Lida com o envio do formulário (Adicionar ou Editar)
+        productForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = productNameInput.value.trim();
+            const description = productDescriptionInput.value.trim();
+            const price = parseFloat(productPriceInput.value);
+            const category = productCategoryInput.value;
+            const supplierLink = supplierLinkInput.value.trim();
+            
+            // A imagem principal agora vem diretamente do mainImageUrlInput
+            const finalImageUrl = mainImageUrlInput.value.trim(); 
+
+            const additionalImages = additionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
+
+            // NOVO: Validação para o Link do Fornecedor
+            if (!supplierLink.startsWith('http://') && !supplierLink.startsWith('https://')) {
+                showFeedback("O 'Link do Fornecedor' deve ser uma URL válida (começar com http:// ou https://).", 'error');
+                return;
+            }
+
+            if (!name || !description || isNaN(price) || price <= 0 || !category || !supplierLink || !finalImageUrl) {
+                showFeedback("Por favor, preencha todos os campos obrigatórios corretamente (Nome, Descrição, Preço, Categoria, Link do Fornecedor e Imagem Principal).", 'error');
+                return;
+            }
+
+            let products = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+
+            const productData = {
+                name: name,
+                description: description,
+                price: price,
+                category: category,
+                supplierLink: supplierLink,
+                imageUrl: finalImageUrl, // Salva a URL final (caminho local ou URL externa)
+                additionalImages: additionalImages,
+                lastUpdated: new Date().toISOString()
+            };
+
+            if (currentEditingProductId) {
+                // Edita um produto existente
+                products = products.map(p => p.id === currentEditingProductId ? { ...p, ...productData } : p);
+                showFeedback("Produto atualizado localmente!");
+            } else {
+                // Adiciona um novo produto
+                productData.id = Date.now().toString();
+                products.push(productData);
+                showFeedback("Produto adicionado localmente!");
+            }
+
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(products));
+            resetForm();
+            loadProducts(); 
+        });
+
+        // Função para preencher o formulário para edição
+        function editProduct(id) {
+            const products = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+            const productToEdit = products.find(p => p.id === id);
+
+            if (productToEdit) {
+                currentEditingProductId = id;
+                formTitle.textContent = "Editar Produto";
+                saveProductBtn.textContent = "Atualizar Produto";
+                cancelEditBtn.classList.remove('hidden');
+
+                productNameInput.value = productToEdit.name;
+                productDescriptionInput.value = productToEdit.description;
+                productPriceInput.value = productToEdit.price;
+                productCategoryInput.value = productToEdit.category || '';
+                supplierLinkInput.value = productToEdit.supplierLink || '';
+                
+                // Preenche o campo de URL da imagem principal
+                mainImageUrlInput.value = productToEdit.imageUrl || '';
+
+                additionalImagesInput.value = productToEdit.additionalImages ? productToEdit.additionalImages.join(', ') : '';
+
+                if (productToEdit.imageUrl) {
+                    imagePreview.src = productToEdit.imageUrl;
+                    imagePreview.classList.remove('hidden');
+                    // Mostra o botão de download se for uma URL da web
+                    if (productToEdit.imageUrl.startsWith('http://') || productToEdit.imageUrl.startsWith('https://')) {
+                        downloadMainImageBtn.classList.remove('hidden');
+                    } else {
+                        downloadMainImageBtn.classList.add('hidden');
+                    }
+                } else {
+                    imagePreview.classList.add('hidden');
+                    imagePreview.src = '';
+                    downloadMainImageBtn.classList.add('hidden');
+                }
+            } else {
+                showFeedback("Produto não encontrado para edição.", 'error');
+            }
+        }
+
+        // Função para mostrar o modal de confirmação de exclusão
+        function showDeleteConfirmModal(id) {
+            currentEditingProductId = id;
+            deleteConfirmModal.classList.remove('hidden');
+        }
+
+        // Função para esconder o modal de confirmação de exclusão
+        function hideDeleteConfirmModal() {
+            deleteConfirmModal.classList.add('hidden');
+            currentEditingProductId = null;
+        }
+
+        // Função principal para deletar um produto (chamada após confirmação do modal)
+        function executeDeleteProduct(id) {
+            let products = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(products));
+            showFeedback("Produto excluído localmente!");
+            resetForm();
+            loadProducts(); 
+        }
+
+        // Event listeners para os botões do modal de confirmação
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (currentEditingProductId) {
+                executeDeleteProduct(currentEditingProductId);
+            }
+            hideDeleteConfirmModal();
+        });
+
+        cancelDeleteBtn.addEventListener('click', hideDeleteConfirmModal);
+
+        // Função para resetar o formulário
+        function resetForm() {
+            productForm.reset();
+            productIdInput.value = '';
+            mainImageUrlInput.value = ''; 
+            additionalImagesInput.value = '';
+            productCategoryInput.value = '';
+            supplierLinkInput.value = '';
+            currentEditingProductId = null;
+            formTitle.textContent = "Adicionar Novo Produto";
+            saveProductBtn.textContent = "Salvar Produto";
+            cancelEditBtn.classList.add('hidden');
+            imagePreview.classList.add('hidden');
+            imagePreview.src = '';
+            uploadProgress.classList.add('hidden');
+            downloadMainImageBtn.classList.add('hidden'); // Oculta o botão de download ao resetar
+        }
+
+        // Event listener para o botão Cancelar Edição
+        cancelEditBtn.addEventListener('click', resetForm);
+
+        // Event listener para o campo de busca de produtos (para filtrar enquanto digita)
+        productSearchInput.addEventListener('input', (e) => {
+            loadProducts(e.target.value); 
+        });
+
+        // Event listener para o botão de busca
+        searchProductBtn.addEventListener('click', () => {
+            loadProducts(productSearchInput.value);
+        });
+
+        // Event listener para a tecla "Enter" no campo de busca
+        productSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); 
+                loadProducts(productSearchInput.value);
+            }
+        });
+
+        // Carrega os produtos ao iniciar a página
+        document.addEventListener('DOMContentLoaded', () => loadProducts());
+    </script>
+</body>
+</html>

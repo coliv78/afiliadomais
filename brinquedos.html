@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brinquedos - Minha Loja Afiliada</title>
+    
+    <!-- Inclui o CDN do Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuração do Tailwind para usar a fonte Inter e cores personalizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#6B7280',
+                        background: '#F9FAFB',
+                        card: '#FFFFFF',
+                        border: '#E5E7EB',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Importa a fonte 'Inter' do Google Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Estilos para o modal de imagem */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Fundo escuro com transparência */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Garante que o modal esteja acima de outros elementos */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            position: relative;
+            background-color: transparent; /* Conteúdo sem fundo para a imagem */
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Garante que a imagem se ajuste sem cortar */
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Sombra para destacar a imagem */
+        }
+        .modal-nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.6); /* Levemente mais escuro */
+            color: white;
+            padding: 12px 18px; /* Maior padding */
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 2.2rem; /* Fonte um pouco maior */
+            line-height: 1;
+            user-select: none;
+            transition: background-color 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3); /* Borda sutil */
+        }
+        .modal-nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.9); /* Mais escuro no hover */
+        }
+        .modal-nav-button.left {
+            left: -60px; /* Posição à esquerda do modal, um pouco mais afastado */
+        }
+        .modal-nav-button.right {
+            right: -60px; /* Posição à direita do modal, um pouco mais afastado */
+        }
+        .modal-close-button {
+            position: absolute;
+            top: 15px; /* Mais afastado do topo */
+            right: 15px; /* Mais afastado da direita */
+            background-color: rgba(0, 0, 0, 0.6); /* Levemente mais escuro */
+            color: white;
+            padding: 8px 12px; /* Maior padding */
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.8rem; /* Fonte um pouco maior */
+            line-height: 1;
+            transition: background-color 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3); /* Borda sutil */
+        }
+        .modal-close-button:hover {
+            background-color: rgba(0, 0, 0, 0.9); /* Mais escuro no hover */
+        }
+
+        /* Responsividade para botões de navegação do modal */
+        @media (max-width: 768px) {
+            .modal-nav-button.left {
+                left: 10px;
+            }
+            .modal-nav-button.right {
+                right: 10px;
+            }
+            .modal-nav-button {
+                padding: 8px 12px;
+                font-size: 1.8rem;
+            }
+            .modal-close-button {
+                padding: 6px 10px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans bg-background text-gray-800 antialiased">
+
+    <!-- Cabeçalho da Página -->
+    <header class="bg-primary text-white shadow-lg py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold rounded-lg p-2">Minha Loja</h1>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="index.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Início</a></li>
+                    <li><a href="eletronicos.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Eletrônicos</a></li>
+                    <li><a href="moda.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Moda</a></li>
+                    <li><a href="casa.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Casa</a></li>
+                    <li><a href="beleza.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Beleza</a></li>
+                    <li><a href="esporte.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Esporte</a></li>
+                    <li><a href="brinquedos.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Brinquedos</a></li>
+                    <li><a href="outros.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Outros</a></li>
+                
+                    <li><a href="politicas.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Políticas</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="search-section bg-card py-10 px-4 shadow-md rounded-lg mx-auto mt-8 max-w-4xl">
+        <div class="container mx-auto text-center">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Buscar em Brinquedos..."
+                class="w-full max-w-xl p-4 text-lg border border-border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
+            />
+        </div>
+    </section>
+
+    <section id="brinquedos-produtos" class="produtos-container container mx-auto px-4 py-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Brinquedos</h2>
+        <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- Produtos serão carregados aqui via JavaScript -->
+            <p id="noProductsMessage" class="text-center text-gray-500 col-span-full">Nenhum produto nesta categoria ainda.</p>
+        </div>
+    </section>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-sm">&copy; 2025 Minha Loja Afiliada. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Modal de Imagem -->
+    <div id="imageModal" class="modal-overlay">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Imagem do Produto" class="modal-image">
+            <button id="prevImageBtn" class="modal-nav-button left">&lt;</button>
+            <button id="nextImageBtn" class="modal-nav-button right">&gt;</button>
+            <button id="closeModalBtn" class="modal-close-button">X</button>
+        </div>
+    </div>
+
+    <script>
+        const LOCAL_STORAGE_KEY = 'minhaLojaProdutos';
+        const CATEGORY_NAME = 'brinquedos'; // Define a categoria específica para esta página
+
+        const productListDiv = document.getElementById('productList');
+        const noProductsMessage = document.getElementById('noProductsMessage');
+        const searchInput = document.getElementById('searchInput');
+
+        // Referências do modal
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const prevImageBtn = document.getElementById('prevImageBtn');
+        const nextImageBtn = document.getElementById('nextImageBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        let currentImages = []; // Array de URLs de imagens para o produto atual
+        let currentImageIndex = 0; // Índice da imagem atualmente exibida no modal
+
+        // Função para carregar e exibir os produtos do localStorage, filtrados por categoria
+        function loadProductsForDisplay(searchTerm = '') {
+            const products = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+            productListDiv.innerHTML = ''; // Limpa a lista antes de carregar
+
+            // Filtra os produtos pela categoria específica E pelo termo de busca
+            const filteredProducts = products.filter(product => 
+                (product.category && product.category.toLowerCase() === CATEGORY_NAME.toLowerCase()) &&
+                (product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.description.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+
+            if (filteredProducts.length === 0) {
+                noProductsMessage.classList.remove('hidden');
+                productListDiv.appendChild(noProductsMessage);
+                return;
+            } else {
+                noProductsMessage.classList.add('hidden');
+            }
+
+            filteredProducts.forEach(product => {
+                const productCardHtml = `
+                    <div class="bg-card rounded-lg shadow-md overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl">
+                        <a href="#" class="product-image-link" data-product-id="${product.id}">
+                            <img src="${product.imageUrl || 'https://placehold.co/400x300/E5E7EB/6B7280?text=Sem+Imagem'}" 
+                                 alt="${product.name}" class="w-full h-48 object-cover cursor-pointer">
+                        </a>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2">${product.name}</h3>
+                            <p class="text-secondary text-sm mb-4 line-clamp-2">${product.description}</p>
+                            <p class="text-xs text-gray-500 mb-2">Categoria: ${product.category || 'N/A'}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-2xl font-bold text-primary">R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</span>
+                                <a href="${product.supplierLink}" target="_blank" rel="noopener noreferrer"
+                                   class="bg-primary text-white px-5 py-2 rounded-full hover:bg-indigo-600 transition-colors duration-300">Comprar Agora</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                productListDiv.insertAdjacentHTML('beforeend', productCardHtml);
+            });
+
+            // Adiciona event listeners para as imagens dos produtos
+            document.querySelectorAll('.product-image-link img').forEach(img => {
+                img.addEventListener('click', (e) => {
+                    e.preventDefault(); // Impede o redirecionamento do link
+                    const productId = e.target.closest('.product-image-link').dataset.productId;
+                    openImageModal(productId);
+                });
+            });
+        }
+
+        // Função para abrir o modal de imagem
+        function openImageModal(productId) {
+            const products = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+            const product = products.find(p => p.id === productId);
+
+            if (product) {
+                currentImages = [product.imageUrl, ...(product.additionalImages || [])].filter(url => url);
+                currentImageIndex = 0; // Sempre começa com a primeira imagem
+
+                if (currentImages.length > 0) {
+                    modalImage.src = currentImages[currentImageIndex];
+                    imageModal.classList.add('show');
+                    updateModalNavigation();
+                } else {
+                    console.warn("Nenhuma imagem encontrada para este produto.");
+                }
+            }
+        }
+
+        // Função para atualizar a navegação do modal (setas)
+        function updateModalNavigation() {
+            prevImageBtn.style.display = currentImages.length > 1 && currentImageIndex > 0 ? 'block' : 'none';
+            nextImageBtn.style.display = currentImages.length > 1 && currentImageIndex < currentImages.length - 1 ? 'block' : 'none';
+        }
+
+        // Event listener para o botão "Próxima Imagem"
+        nextImageBtn.addEventListener('click', () => {
+            if (currentImageIndex < currentImages.length - 1) {
+                currentImageIndex++;
+                modalImage.src = currentImages[currentImageIndex];
+                updateModalNavigation();
+            }
+        });
+
+        // Event listener para o botão "Imagem Anterior"
+        prevImageBtn.addEventListener('click', () => {
+            if (currentImageIndex > 0) {
+                currentImageIndex--;
+                modalImage.src = currentImages[currentImageIndex];
+                updateModalNavigation();
+            }
+        });
+
+        // Event listener para o botão "Fechar Modal"
+        closeModalBtn.addEventListener('click', () => {
+            imageModal.classList.remove('show');
+        });
+
+        // Event listener para fechar o modal ao clicar fora da imagem
+        imageModal.addEventListener('click', (e) => {
+            if (e.target === imageModal) {
+                imageModal.classList.remove('show');
+            }
+        });
+
+        // Adiciona um listener para a busca
+        searchInput.addEventListener('input', (e) => {
+            loadProductsForDisplay(e.target.value);
+        });
+
+        // Carrega os produtos ao iniciar a página
+        document.addEventListener('DOMContentLoaded', () => loadProductsForDisplay());
+    </script>
+</body>
+</html>
