@@ -151,14 +151,34 @@
         // Variável para armazenar todos os produtos carregados
         let allProducts = [];
 
+        // Função para esperar que o Supabase SDK esteja carregado
+        function waitForSupabase() {
+            return new Promise((resolve, reject) => {
+                const checkSupabase = () => {
+                    if (typeof Supabase !== 'undefined' && Supabase.createClient) {
+                        resolve();
+                    } else {
+                        setTimeout(checkSupabase, 50); // Tenta novamente em 50ms
+                    }
+                };
+                checkSupabase();
+            });
+        }
+
         // Evento de carregamento do DOM para inicializar Supabase e carregar produtos
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // Adicione a messageDiv ao DOM assim que o DOM estiver carregado
             document.querySelector('main').prepend(messageDiv);
 
-            // Inicialize o cliente Supabase aqui, dentro do DOMContentLoaded
-            // Isso garante que o objeto Supabase esteja disponível.
-            supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            // Espera pelo Supabase SDK antes de inicializar o cliente
+            try {
+                await waitForSupabase();
+                supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } catch (error) {
+                console.error("Erro crítico: Não foi possível carregar o SDK do Supabase.", error);
+                showMessage("Erro crítico: O sistema não pôde ser carregado. Verifique sua conexão com a internet ou entre em contato com o suporte.", 'error');
+                return; // Impede a execução do restante do script se o Supabase não carregar
+            }
 
             // --- Referências aos Elementos HTML de Gerenciamento de Produtos ---
             const productForm = document.getElementById('product-form');
