@@ -29,86 +29,21 @@
 </head>
 <body class="font-sans bg-background text-gray-800 antialiased">
 
-    <!-- Cabeçalho (se você quiser manter o mesmo do seu site) -->
+    <!-- Cabeçalho -->
     <header class="bg-primary text-white shadow-lg py-4">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <h1 class="text-3xl font-bold rounded-lg p-2">Minha Loja - Gerenciador</h1>
             <nav>
                 <ul class="flex space-x-6">
                     <li><a href="index.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Início</a></li>
-                    <!-- Adicione outros links de navegação se necessário -->
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- Seção Principal do Gerenciador -->
+    <!-- Seção Principal do Gerenciador (visível diretamente) -->
     <main class="container mx-auto px-4 py-10">
-        <section id="auth-section" class="bg-card shadow-lg rounded-lg p-8 max-w-md mx-auto">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center" id="auth-title">Acessar Gerenciador</h2>
-
-            <!-- Formulário de Login -->
-            <form id="login-form" class="space-y-4">
-                <div>
-                    <label for="login-email" class="block text-sm font-medium text-gray-700">Email:</label>
-                    <input type="email" id="login-email" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                </div>
-                <div>
-                    <label for="login-password" class="block text-sm font-medium text-gray-700">Senha:</label>
-                    <input type="password" id="login-password" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                </div>
-                <div>
-                    <label for="login-admin-id" class="block text-sm font-medium text-gray-700">ID de Administrador (Opcional):</label>
-                    <input type="text" id="login-admin-id" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="Gerado automaticamente no cadastro" />
-                </div>
-                <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold">Entrar</button>
-            </form>
-
-            <div class="mt-6 text-center">
-                <p class="text-sm text-gray-600">
-                    Ainda não tem conta? <a href="#" id="show-register" class="text-primary hover:underline font-medium">Cadastre-se aqui</a>
-                </p>
-                <p class="text-sm text-gray-600 mt-2">
-                    Esqueceu seu login? <a href="#" id="show-recover" class="text-primary hover:underline font-medium">Recuperar acesso</a>
-                </p>
-            </div>
-
-            <!-- Formulário de Cadastro (Inicialmente oculto) -->
-            <form id="register-form" class="space-y-4 hidden">
-                <div>
-                    <label for="register-email" class="block text-sm font-medium text-gray-700">Email:</label>
-                    <input type="email" id="register-email" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                </div>
-                <div>
-                    <label for="register-password" class="block text-sm font-medium text-gray-700">Senha:</label>
-                    <input type="password" id="register-password" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary"
-                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$"
-                        title="A senha deve ter entre 8 e 16 caracteres, incluindo pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial."
-                        required />
-                    <p class="text-xs text-gray-500 mt-1">8-16 caracteres, min. 1 maiúscula, 1 minúscula, 1 número, 1 especial.</p>
-                </div>
-                <div id="generated-admin-id-display" class="hidden bg-gray-100 p-3 rounded-md border border-border">
-                    <label class="block text-sm font-medium text-gray-700">Seu ID de Administrador Gerado:</label>
-                    <p id="admin-id-value" class="mt-1 font-mono text-gray-900 break-words text-sm"></p>
-                    <p class="text-xs text-red-500 mt-1">Anote este ID! Ele será crucial para recuperação de acesso.</p>
-                </div>
-                <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold">Cadastrar</button>
-            </form>
-
-            <!-- Formulário de Recuperação de Senha (Inicialmente oculto) -->
-            <form id="recover-form" class="space-y-4 hidden">
-                <div>
-                    <label for="recover-email-or-id" class="block text-sm font-medium text-gray-700">Email ou ID de Administrador:</label>
-                    <input type="text" id="recover-email-or-id" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                </div>
-                <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold">Recuperar Senha</button>
-            </form>
-
-            <div id="message" class="mt-4 p-3 text-sm rounded-md" style="display: none;"></div>
-        </section>
-
-        <!-- Conteúdo do Gerenciador (visível após o login) -->
-        <section id="manager-content" class="bg-card shadow-lg rounded-lg p-8 mt-8 hidden">
+        <section id="manager-content" class="bg-card shadow-lg rounded-lg p-8">
             <h2 class="text-2xl font-bold text-gray-900 mb-6">Bem-vindo ao Gerenciador!</h2>
             <p class="text-gray-700 mb-8">Utilize os formulários abaixo para gerenciar os produtos da sua loja.</p>
 
@@ -181,274 +116,63 @@
         </div>
     </footer>
 
-    <!-- Script JavaScript para o Supabase e Lógica de Autenticação e Gerenciamento -->
+    <!-- Script JavaScript para o Supabase e Lógica de Gerenciamento -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // --- Configuração do Supabase ---
         const SUPABASE_URL = 'https://euipmrgkumsrdumglfmx.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ1OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiWu9fM';         
 
-        // Inicialize o cliente Supabase imediatamente após o carregamento do SDK
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabase; // Declara a variável supabase aqui
 
-        // --- Referências aos Elementos HTML de Autenticação ---
-        const authTitle = document.getElementById('auth-title');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const recoverForm = document.getElementById('recover-form');
-        const showRegisterBtn = document.getElementById('show-register');
-        const showRecoverBtn = document.getElementById('show-recover');
-        const authSection = document.getElementById('auth-section');
-        const managerContent = document.getElementById('manager-content');
-        const logoutButton = document.getElementById('logout-button');
-        const messageDiv = document.getElementById('message');
+        // Crie a messageDiv no escopo global do script para que showMessage possa acessá-la sempre
+        const messageDiv = document.createElement('div');
+        messageDiv.id = 'message';
+        messageDiv.className = 'mt-4 p-3 text-sm rounded-md';
+        messageDiv.style.display = 'none';
 
-        const loginEmailInput = document.getElementById('login-email');
-        const loginPasswordInput = document.getElementById('login-password');
-        const loginAdminIdInput = document.getElementById('login-admin-id');
-
-        const registerEmailInput = document.getElementById('register-email');
-        const registerPasswordInput = document.getElementById('register-password');
-        const generatedAdminIdDisplay = document.getElementById('generated-admin-id-display');
-        const adminIdValue = document.getElementById('admin-id-value');
-
-        const recoverEmailOrIdInput = document.getElementById('recover-email-or-id');
-
-        // --- Referências aos Elementos HTML de Gerenciamento de Produtos ---
-        const productForm = document.getElementById('product-form');
-        const productIdInput = document.getElementById('product-id');
-        const productNameInput = document.getElementById('product-name');
-        const productDescriptionInput = document.getElementById('product-description');
-        const productPriceInput = document.getElementById('product-price');
-        const productCategorySelect = document.getElementById('product-category');
-        const productSupplierLinkInput = document.getElementById('product-supplier-link');
-        const productImageUrlInput = document.getElementById('product-image-url');
-        const productAdditionalImagesInput = document.getElementById('product-additional-images');
-        const submitProductBtn = document.getElementById('submit-product-btn');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn');
-        const productFormTitle = document.getElementById('product-form-title');
-        const productListDiv = document.getElementById('product-list');
-        const noProductsMessage = document.getElementById('no-products-message');
-
-
-        // --- Regex para Validação de Senha ---
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
-
-        // --- Funções Auxiliares ---
-        function showMessage(msg, type = 'info') {
-            messageDiv.textContent = msg;
-            messageDiv.style.display = 'block';
-            messageDiv.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800');
-            if (type === 'success') {
-                messageDiv.classList.add('bg-green-100', 'text-green-800');
-            } else if (type === 'error') {
-                messageDiv.classList.add('bg-red-100', 'text-red-800');
-            } else { // info
-                messageDiv.classList.add('bg-blue-100', 'text-blue-800');
-            }
-        }
-
-        function hideForms() {
-            loginForm.classList.add('hidden');
-            registerForm.classList.add('hidden');
-            recoverForm.classList.add('hidden');
-            messageDiv.style.display = 'none';
-        }
-
-        function generateAdminId(length = 16) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_+=';
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
-        }
-
-        // --- Lógica de Autenticação ---
-
-        // Função para verificar o estado da sessão
-        async function checkSession() {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (session) {
-                // Usuário logado, verificar se é um administrador
-                const { data: adminData, error: adminError } = await supabase
-                    .from('administradores') // Nome da sua nova tabela de administradores
-                    .select('admin_id')
-                    .eq('user_id', session.user.id)
-                    .single();
-
-                if (adminError || !adminData) {
-                    // Não é um administrador ou erro ao buscar, desloga
-                    console.error('Usuário logado não é um administrador ou erro ao buscar admin_id:', adminError);
-                    await supabase.auth.signOut();
-                    showMessage('Acesso negado. Você não é um administrador.', 'error');
-                    return;
-                }
-
-                // Usuário logado E é um administrador
-                hideForms();
-                authSection.classList.add('hidden'); // Esconde a seção de login/cadastro
-                managerContent.classList.remove('hidden');
-                loadProducts(); // Carrega os produtos quando o admin faz login
-            } else {
-                // Nenhum usuário logado
-                authSection.classList.remove('hidden'); // Mostra a seção de login/cadastro
-                managerContent.classList.add('hidden');
-                hideForms();
-                loginForm.classList.remove('hidden'); // Mostra o formulário de login por padrão
-                authTitle.textContent = 'Acessar Gerenciador';
-            }
-        }
-
-        // Evento de carregamento do DOM para inicializar Supabase e verificar a sessão
+        // Evento de carregamento do DOM para inicializar Supabase e carregar produtos
         document.addEventListener('DOMContentLoaded', () => {
-            checkSession(); // Verifica a sessão após a inicialização do Supabase
+            // Adicione a messageDiv ao DOM assim que o DOM estiver carregado
+            document.querySelector('main').prepend(messageDiv);
 
-            // Evento para monitorar mudanças na sessão (login, logout, etc.)
-            supabase.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
-                    checkSession();
+            // Inicialize o cliente Supabase aqui, dentro do DOMContentLoaded
+            // Esta é a forma mais robusta de garantir que Supabase esteja definido.
+            supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+            // --- Referências aos Elementos HTML de Gerenciamento de Produtos ---
+            const productForm = document.getElementById('product-form');
+            const productIdInput = document.getElementById('product-id');
+            const productNameInput = document.getElementById('product-name');
+            const productDescriptionInput = document.getElementById('product-description');
+            const productPriceInput = document.getElementById('product-price');
+            const productCategorySelect = document.getElementById('product-category');
+            const productSupplierLinkInput = document.getElementById('product-supplier-link');
+            const productImageUrlInput = document.getElementById('product-image-url');
+            const productAdditionalImagesInput = document.getElementById('product-additional-images');
+            const submitProductBtn = document.getElementById('submit-product-btn');
+            const cancelEditBtn = document.getElementById('cancel-edit-btn');
+            const productFormTitle = document.getElementById('product-form-title');
+            const productListDiv = document.getElementById('product-list');
+            const noProductsMessage = document.getElementById('no-products-message');
+            
+            // Botão de Logout (simplificado, apenas recarrega a página)
+            const logoutButton = document.getElementById('logout-button');
+
+
+            // --- Funções Auxiliares ---
+            function showMessage(msg, type = 'info') {
+                messageDiv.textContent = msg;
+                messageDiv.style.display = 'block';
+                messageDiv.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800');
+                if (type === 'success') {
+                    messageDiv.classList.add('bg-green-100', 'text-green-800');
+                } else if (type === 'error') {
+                    messageDiv.classList.add('bg-red-100', 'text-red-800');
+                } else { // info
+                    messageDiv.classList.add('bg-blue-100', 'text-blue-800');
                 }
-            });
-
-            // Login de Administrador
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = loginEmailInput.value;
-                const password = loginPasswordInput.value;
-                const adminId = loginAdminIdInput.value.trim();
-
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password,
-                });
-
-                if (error) {
-                    showMessage(`Erro no login: ${error.message}`, 'error');
-                } else if (data.user) {
-                    const { data: adminData, error: adminError } = await supabase
-                        .from('administradores')
-                        .select('admin_id')
-                        .eq('user_id', data.user.id)
-                        .single();
-
-                    if (adminError || !adminData) {
-                        showMessage('Credenciais de administrador inválidas ou ID de administrador incorreto.', 'error');
-                        await supabase.auth.signOut();
-                        return;
-                    }
-
-                    if (adminId && adminData.admin_id !== adminId) {
-                        showMessage('ID de Administrador incorreto.', 'error');
-                        await supabase.auth.signOut();
-                        return;
-                    }
-
-                    showMessage('Login bem-sucedido!', 'success');
-                }
-            });
-
-            // Cadastro de Administrador
-            showRegisterBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                hideForms();
-                registerForm.classList.remove('hidden');
-                authTitle.textContent = 'Cadastrar Administrador';
-                generatedAdminIdDisplay.classList.add('hidden');
-                adminIdValue.textContent = '';
-            });
-
-            registerForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = registerEmailInput.value;
-                const password = registerPasswordInput.value;
-
-                if (!passwordRegex.test(password)) {
-                    showMessage('A senha não atende aos requisitos de segurança. Verifique o padrão.', 'error');
-                    return;
-                }
-
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: email,
-                    password: password,
-                });
-
-                if (authError) {
-                    showMessage(`Erro no cadastro: ${authError.message}`, 'error');
-                    return;
-                }
-
-                if (authData.user) {
-                    const generatedId = generateAdminId();
-                    const userId = authData.user.id;
-
-                    const { error: insertError } = await supabase
-                        .from('administradores')
-                        .insert([{ user_id: userId, admin_id: generatedId, email: email }]);
-
-                    if (insertError) {
-                        console.error('Erro ao salvar ID do administrador:', insertError);
-                        showMessage(`Cadastro de usuário concluído, mas houve um erro ao salvar o ID de administrador: ${insertError.message}. Por favor, entre em contato com o suporte.`, 'error');
-                        return;
-                    }
-
-                    adminIdValue.textContent = generatedId;
-                    generatedAdminIdDisplay.classList.remove('hidden');
-                    showMessage('Cadastro bem-sucedido! Um e-mail de confirmação foi enviado para ' + email + '. Por favor, ANOTE SEU ID DE ADMINISTRADOR e verifique sua caixa de entrada para ativar sua conta.', 'success');
-                    registerForm.reset();
-                } else {
-                    showMessage('Cadastro bem-sucedido! Um e-mail de confirmação foi enviado para ' + email + '. Por favor, verifique sua caixa de entrada para ativar sua conta.', 'success');
-                    registerForm.reset();
-                }
-            });
-
-            // Recuperação de Senha
-            showRecoverBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                hideForms();
-                recoverForm.classList.remove('hidden');
-                authTitle.textContent = 'Recuperar Acesso';
-            });
-
-            recoverForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const emailOrId = recoverEmailOrIdInput.value.trim();
-
-                let targetEmail = emailOrId;
-                if (!emailOrId.includes('@')) {
-                    const { data: adminData, error: adminError } = await supabase
-                        .from('administradores')
-                        .select('email')
-                        .eq('admin_id', emailOrId)
-                        .single();
-
-                    if (adminError || !adminData) {
-                        showMessage('ID de Administrador não encontrado ou erro ao buscar e-mail.', 'error');
-                        return;
-                    }
-                    targetEmail = adminData.email;
-                }
-
-                const { error } = await supabase.auth.resetPasswordForEmail(targetEmail, {
-                    redirectTo: window.location.origin + '/nova_senha_admin.html',
-                });
-
-                if (error) {
-                    showMessage(`Erro na recuperação: ${error.message}`, 'error');
-                } else {
-                    showMessage('Link de recuperação enviado para o seu e-mail (se cadastrado)! Verifique sua caixa de entrada.', 'info');
-                }
-            });
-
-            // Logout
-            logoutButton.addEventListener('click', async () => {
-                const { error } = await supabase.auth.signOut();
-                if (error) {
-                    showMessage(`Erro ao sair: ${error.message}`, 'error');
-                } else {
-                    showMessage('Sessão encerrada com sucesso.', 'success');
-                }
-            });
+            }
 
             // --- Lógica de Gerenciamento de Produtos ---
 
@@ -545,7 +269,8 @@
             // Função para excluir um produto
             async function deleteProduct(event) {
                 const productId = event.target.dataset.id;
-                if (!confirm('Tem certeza que deseja excluir este produto?')) {
+                // Substituir confirm() por um modal customizado
+                if (!window.confirm('Tem certeza que deseja excluir este produto?')) { // Usando window.confirm temporariamente para teste
                     return;
                 }
 
@@ -637,8 +362,16 @@
                     loadProducts(); // Recarrega a lista de produtos
                 }
             });
+
+            // Adiciona listener para o botão de logout
+            logoutButton.addEventListener('click', () => {
+                // Simplesmente recarrega a página, já que não há sessão para "sair"
+                window.location.reload();
+            });
+
+            // Carrega os produtos quando o DOM estiver completamente carregado
+            loadProducts();
         }); // Fim do DOMContentLoaded
     </script>
 </body>
 </html>
-
