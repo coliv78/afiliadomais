@@ -1,668 +1,290 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gerenciador de Produtos - Minha Loja Afiliada</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#4F46E5',
-                        secondary: '#6B7280',
-                        background: '#F9FAFB',
-                        card: '#FFFFFF',
-                        border: '#E5E7EB',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        /* Estilos para o input de arquivo oculto, para garantir que seja clicável mas invisível */
-        #file-input {
-            opacity: 0;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            cursor: pointer;
-            z-index: 10; /* Garante que esteja acima de outros elementos na zona de drop */
-        }
-        /* Ajuste para a zona de drop para que o input de arquivo fique por cima */
-        #image-drop-zone {
-            position: relative;
-            overflow: hidden; /* Garante que o input oculto não "vaze" */
-            display: flex; /* Usar flexbox para centralizar o conteúdo */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem; /* Ajuste o padding para dar espaço */
-            min-height: 150px; /* Altura mínima para facilitar a interação */
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerenciamento de Produtos</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const supabaseUrl = 'SUA_URL_DO_SUPABASE';
+    const supabaseKey = 'SUA_CHAVE_anon_SUPABASE';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  </script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; }
+    .hidden { display: none; }
+    .border-primary { border: 2px dashed #007bff; }
+    #imageDropZone { cursor: pointer; border: 2px dashed #ccc; padding: 20px; text-align: center; margin-bottom: 10px; background-color: white; }
+    .product-item { margin-bottom: 10px; }
+    #imagePreview { max-width: 200px; margin-top: 10px; display: none; }
+    .message { padding: 8px; margin-top: 10px; border-radius: 4px; }
+    .message.success { background-color: #d4edda; color: #155724; }
+    .message.error { background-color: #f8d7da; color: #721c24; }
+    .message.info { background-color: #cce5ff; color: #004085; }
+  </style>
 </head>
-<body class="font-sans bg-background text-gray-800 antialiased">
+<body>
+  <h1>Gerenciar Produtos</h1>
 
-    <!-- Cabeçalho -->
-    <header class="bg-primary text-white shadow-lg py-4">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <h1 class="text-3xl font-bold rounded-lg p-2">Minha Loja - Gerenciador de Produtos</h1>
-            <nav>
-                <ul class="flex space-x-6">
-                    <li><a href="index.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Início</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+  <input type="text" id="searchInput" placeholder="Buscar produtos..." style="width: 100%; padding: 8px; margin-bottom: 20px;">
 
-    <!-- Seção Principal do Gerenciador (visível diretamente) -->
-    <main class="container mx-auto px-4 py-10">
-        <section id="manager-content" class="bg-card shadow-lg rounded-lg p-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Bem-vindo ao Gerenciador de Produtos!</h2>
-            <p class="text-gray-700 mb-8">Utilize os formulários abaixo para gerenciar os produtos da sua loja.</p>
+  <h2 id="productFormTitle">Adicionar Novo Produto</h2>
+  <form id="productForm">
+    <input type="hidden" id="productId" />
+    <input type="text" id="productName" placeholder="Nome" required /><br/>
+    <textarea id="productDescription" placeholder="Descrição" required></textarea><br/>
+    <input type="number" id="productPrice" placeholder="Preço (ex: 49.99)" required /><br/>
+    <input type="text" id="productCategory" placeholder="Categoria" required /><br/>
+    <input type="url" id="productSupplierLink" placeholder="Link do fornecedor" required /><br/>
+    <input type="text" id="productImageUrl" placeholder="URL da Imagem Principal" readonly /><br/>
+    <input type="text" id="productAdditionalImages" placeholder="Imagens adicionais (URLs separadas por vírgula)" /><br/>
 
-            <!-- Formulário de Adição/Edição de Produtos -->
-            <div class="mb-10 p-6 border border-border rounded-lg shadow-sm">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4" id="product-form-title">Adicionar Novo Produto</h3>
-                <form id="product-form" class="space-y-4">
-                    <input type="hidden" id="product-id"> <!-- Campo oculto para ID do produto em edição -->
+    <div id="imageDropZone">Arraste e solte imagens aqui ou <button type="button" id="selectImageBtn">Selecionar Imagem</button></div>
+    <input type="file" id="fileInput" accept="image/*" multiple class="hidden" />
+    <img id="imagePreview" src="" alt="Pré-visualização da Imagem"/>
+    <p id="imageUploadStatus"></p>
 
-                    <div>
-                        <label for="product-name" class="block text-sm font-medium text-gray-700">Nome do Produto:</label>
-                        <input type="text" id="product-name" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                    </div>
-                    <div>
-                        <label for="product-description" class="block text-sm font-medium text-gray-700">Descrição:</label>
-                        <textarea id="product-description" rows="3" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required></textarea>
-                    </div>
-                    <div>
-                        <label for="product-price" class="block text-sm font-medium text-gray-700">Preço (R$):</label>
-                        <input type="number" step="0.01" id="product-price" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                    </div>
-                    <div>
-                        <label for="product-category" class="block text-sm font-medium text-gray-700">Categoria:</label>
-                        <select id="product-category" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required>
-                            <option value="">Selecione uma categoria</option>
-                            <option value="eletronicos">Eletrônicos</option>
-                            <option value="moda">Moda</option>
-                            <option value="casa">Casa</option>
-                            <option value="beleza">Beleza</option>
-                            <option value="esporte">Esporte</option>
-                            <option value="brinquedos">Brinquedos</option>
-                            <option value="outros">Outros</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="product-supplier-link" class="block text-sm font-medium text-gray-700">Link do Fornecedor (Afiliado):</label>
-                        <input type="url" id="product-supplier-link" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://loja.com/produto-afiliado" required />
-                    </div>
-                    
-                    <!-- Campo de URL da Imagem Principal e Área de Drag and Drop -->
-                    <div>
-                        <label for="product-image-url" class="block text-sm font-medium text-gray-700">URL da Imagem Principal:</label>
-                        <input type="url" id="product-image-url" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://seusite.com/imagem.jpg" required />
-                    </div>
-                    <div id="image-drop-zone" class="mt-4 p-6 border-2 border-dashed border-border rounded-md text-center cursor-pointer hover:border-primary transition-colors duration-300">
-                        <p class="text-gray-600 mb-2">Arraste e solte imagens aqui</p>
-                        <!-- O input de arquivo agora está sobre a zona de drop, mas invisível -->
-                        <input type="file" id="file-input" accept="image/*" multiple /> 
-                        <button type="button" id="select-image-btn" class="mt-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-300 font-semibold">Ou clique para selecionar</button>
-                        <img id="image-preview" src="" alt="Pré-visualização da Imagem" class="max-w-full h-32 mx-auto mt-2 object-contain rounded-md" style="display: none;" />
-                        <p id="image-upload-status" class="text-sm mt-2"></p>
-                    </div>
+    <button type="submit" id="submitProductBtn">Salvar Produto</button>
+    <button type="button" id="cancelEditBtn" class="hidden">Cancelar Edição</button>
+  </form>
 
-                    <div>
-                        <label for="product-additional-images" class="block text-sm font-medium text-gray-700">URLs de Imagens Adicionais (separadas por vírgula):</label>
-                        <textarea id="product-additional-images" rows="2" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
-                        <p class="text-xs text-gray-500 mt-1">Insira URLs completas, separadas por vírgula.</p>
-                    </div>
-                    <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold" id="submit-product-btn">Salvar Produto</button>
-                    <button type="button" class="w-full bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors duration-300 font-semibold mt-2" id="cancel-edit-btn" style="display: none;">Cancelar Edição</button>
-                </form>
-            </div>
+  <div id="messageBox" class="message hidden"></div>
 
-            <!-- Seção de Busca de Produtos -->
-            <div class="mb-6 p-6 border border-border rounded-lg shadow-sm">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Buscar Produtos</h3>
-                <div>
-                    <label for="search-input" class="block text-sm font-medium text-gray-700">Buscar por Nome ou Descrição:</label>
-                    <input type="text" id="search-input" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="Digite o nome ou descrição do produto..." />
-                </div>
-            </div>
+  <h2>Lista de Produtos</h2>
+  <div id="productList"></div>
+  <p id="noProductsMessage" class="hidden">Nenhum produto cadastrado.</p>
 
-            <!-- Lista de Produtos Existentes -->
-            <div class="p-6 border border-border rounded-lg shadow-sm">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Produtos Cadastrados</h3>
-                <div id="product-list" class="space-y-4">
-                    <p id="no-products-message" class="text-center text-gray-500">Nenhum produto cadastrado ainda.</p>
-                    <!-- Produtos serão carregados aqui -->
-                </div>
-            </div>
-        </section>
-    </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const productForm = document.getElementById('productForm');
+      const productIdInput = document.getElementById('productId');
+      const productNameInput = document.getElementById('productName');
+      const productDescriptionInput = document.getElementById('productDescription');
+      const productPriceInput = document.getElementById('productPrice');
+      const productCategorySelect = document.getElementById('productCategory');
+      const productSupplierLinkInput = document.getElementById('productSupplierLink');
+      const productImageUrlInput = document.getElementById('productImageUrl');
+      const productAdditionalImagesInput = document.getElementById('productAdditionalImages');
+      const productFormTitle = document.getElementById('productFormTitle');
+      const submitProductBtn = document.getElementById('submitProductBtn');
+      const cancelEditBtn = document.getElementById('cancelEditBtn');
+      const imageDropZone = document.getElementById('imageDropZone');
+      const fileInput = document.getElementById('fileInput');
+      const selectImageBtn = document.getElementById('selectImageBtn');
+      const imagePreview = document.getElementById('imagePreview');
+      const imageUploadStatus = document.getElementById('imageUploadStatus');
+      const searchInput = document.getElementById('searchInput');
+      const productListDiv = document.getElementById('productList');
+      const noProductsMessage = document.getElementById('noProductsMessage');
+      const messageBox = document.getElementById('messageBox');
+      let allProducts = [];
 
-    <!-- Rodapé -->
-    <footer class="bg-gray-800 text-white py-6 mt-12">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-sm">&copy; 2025 Minha Loja Afiliada. Todos os direitos reservados.</p>
-        </div>
-    </footer>
+      function showMessage(msg, type = 'info') {
+        messageBox.textContent = msg;
+        messageBox.className = `message ${type}`;
+        messageBox.classList.remove('hidden');
+        setTimeout(() => messageBox.classList.add('hidden'), 4000);
+      }
 
-    <!-- Script JavaScript para o Supabase e Lógica de Gerenciamento -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // --- Configuração do Supabase ---
-        const SUPABASE_URL = 'https://euipmrgkumsrdumglfmx.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ0OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiWu9fM';         
-        const SUPABASE_STORAGE_BUCKET = 'product-images'; // Nome do seu bucket no Supabase Storage
+      async function uploadImageToSupabase(file) {
+        const fileName = `${Date.now()}-${file.name}`;
+        const { data, error } = await supabase.storage.from('imagens').upload(fileName, file);
+        if (error) {
+          console.error('Erro ao enviar imagem:', error);
+          showMessage('Erro ao enviar imagem.', 'error');
+          return null;
+        }
+        const { data: urlData } = supabase.storage.from('imagens').getPublicUrl(fileName);
+        return urlData.publicUrl;
+      }
 
-        let supabase; // Declara a variável supabase aqui
+      if (imageDropZone && fileInput && selectImageBtn) {
+        imageDropZone.addEventListener('dragover', e => {
+          e.preventDefault();
+          imageDropZone.classList.add('border-primary');
+        });
 
-        // Crie a messageDiv no escopo global do script para que showMessage possa acessá-la sempre
-        const messageDiv = document.createElement('div');
-        messageDiv.id = 'message';
-        messageDiv.className = 'mt-4 p-3 text-sm rounded-md';
-        messageDiv.style.display = 'none';
+        imageDropZone.addEventListener('dragleave', e => {
+          imageDropZone.classList.remove('border-primary');
+        });
 
-        // Variável para armazenar todos os produtos carregados
-        let allProducts = [];
+        imageDropZone.addEventListener('drop', async e => {
+          e.preventDefault();
+          imageDropZone.classList.remove('border-primary');
+          const files = e.dataTransfer.files;
+          await handleImageUpload(files);
+        });
 
-        // Função para esperar que o Supabase SDK esteja carregado
-        function waitForSupabase(timeout = 10000) { // Adiciona um timeout de 10 segundos
-            return new Promise((resolve, reject) => {
-                const startTime = Date.now();
-                const checkSupabase = () => {
-                    if (typeof Supabase !== 'undefined' && Supabase.createClient) {
-                        console.log('waitForSupabase: Supabase SDK detectado.');
-                        resolve();
-                    } else if (Date.now() - startTime > timeout) {
-                        console.error('waitForSupabase: Tempo limite excedido. Supabase SDK não carregou.');
-                        reject(new Error('Supabase SDK não carregou dentro do tempo limite.'));
-                    } else {
-                        setTimeout(checkSupabase, 50); // Tenta novamente em 50ms
-                    }
-                };
-                checkSupabase();
-            });
+        selectImageBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', async e => {
+          const files = e.target.files;
+          await handleImageUpload(files);
+        });
+      }
+
+      async function handleImageUpload(files) {
+        let mainUploaded = false;
+        let additionalUrls = [];
+        for (const file of files) {
+          if (file.type.startsWith('image/')) {
+            const url = await uploadImageToSupabase(file);
+            if (url) {
+              if (!mainUploaded) {
+                productImageUrlInput.value = url;
+                imagePreview.src = url;
+                imagePreview.style.display = 'block';
+                mainUploaded = true;
+              } else {
+                additionalUrls.push(url);
+              }
+            }
+          } else {
+            showMessage(`"${file.name}" não é uma imagem.`, 'error');
+          }
         }
 
-        // Evento de carregamento do DOM para inicializar Supabase e carregar produtos
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('DOMContentLoaded disparado. Iniciando script principal.');
-            // Adicione a messageDiv ao DOM assim que o DOM estiver carregado
-            document.querySelector('main').prepend(messageDiv);
+        if (additionalUrls.length > 0) {
+          const existing = productAdditionalImagesInput.value.split(',').map(u => u.trim()).filter(u => u);
+          productAdditionalImagesInput.value = [...existing, ...additionalUrls].join(', ');
+        }
+      }
 
-            // Espera pelo Supabase SDK antes de inicializar o cliente
-            try {
-                console.log('Tentando esperar pelo Supabase SDK...');
-                await waitForSupabase();
-                console.log('Supabase SDK carregado. Tentando criar cliente...');
-                supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log('Supabase client inicializado com sucesso!');
-            } catch (error) {
-                console.error("Erro crítico na inicialização do Supabase:", error);
-                showMessage("Erro crítico: O sistema não pôde ser carregado. Verifique sua conexão com a internet ou entre em contato com o suporte.", 'error');
-                return; // Impede a execução do restante do script se o Supabase não carregar
-            }
+      async function loadProducts() {
+        productListDiv.innerHTML = '';
+        noProductsMessage.style.display = 'none';
 
-            // --- Referências aos Elementos HTML de Gerenciamento de Produtos ---
-            console.log('Obtendo referências aos elementos HTML...');
-            const productForm = document.getElementById('product-form');
-            const productIdInput = document.getElementById('product-id');
-            const productNameInput = document.getElementById('product-name');
-            const productDescriptionInput = document.getElementById('product-description');
-            const productPriceInput = document.getElementById('product-price');
-            const productCategorySelect = document.getElementById('product-category');
-            const productSupplierLinkInput = document.getElementById('product-supplier-link');
-            const productImageUrlInput = document.getElementById('product-image-url');
-            const productAdditionalImagesInput = document.getElementById('product-additional-images');
-            const submitProductBtn = document.getElementById('submit-product-btn');
-            const cancelEditBtn = document.getElementById('cancel-edit-btn');
-            const productFormTitle = document.getElementById('product-form-title');
-            const productListDiv = document.getElementById('product-list');
-            const noProductsMessage = document.getElementById('no-products-message');
-            
-            // Referências para os novos elementos de Drag and Drop
-            const imageDropZone = document.getElementById('image-drop-zone');
-            const fileInput = document.getElementById('file-input');
-            const imagePreview = document.getElementById('image-preview');
-            const imageUploadStatus = document.getElementById('image-upload-status');
-            const selectImageBtn = document.getElementById('select-image-btn'); // Novo botão
+        const { data, error } = await supabase.from('produtos').select('*').order('name');
+        if (error) {
+          showMessage('Erro ao carregar produtos.', 'error');
+          return;
+        }
 
-            // Adicionar logs para verificar se os elementos são encontrados
-            console.log('Verificação de elementos HTML:');
-            console.log('imageDropZone:', imageDropZone);
-            console.log('fileInput:', fileInput);
-            console.log('imagePreview:', imagePreview);
-            console.log('selectImageBtn:', selectImageBtn);
-            console.log('productImageUrlInput:', productImageUrlInput); 
-            console.log('productForm:', productForm); 
-            console.log('productListDiv:', productListDiv); 
+        allProducts = data;
+        displayProducts(allProducts);
+      }
 
+      function displayProducts(products) {
+        productListDiv.innerHTML = '';
+        if (products.length === 0) {
+          noProductsMessage.style.display = 'block';
+          return;
+        }
 
-            // Referência para o campo de busca
-            const searchInput = document.getElementById('search-input');
+        products.forEach(prod => {
+          const card = document.createElement('div');
+          card.className = 'product-item';
+          card.innerHTML = `
+            <strong>${prod.name}</strong><br/>
+            R$ ${parseFloat(prod.price).toFixed(2).replace('.', ',')}<br/>
+            Categoria: ${prod.category}<br/>
+            <button data-id="${prod.id}" class="edit">Editar</button>
+            <button data-id="${prod.id}" class="delete">Excluir</button>
+          `;
+          productListDiv.appendChild(card);
+        });
 
-            // --- Funções Auxiliares ---
-            function showMessage(msg, type = 'info') {
-                messageDiv.textContent = msg;
-                messageDiv.style.display = 'block';
-                messageDiv.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800');
-                if (type === 'success') {
-                    messageDiv.classList.add('bg-green-100', 'text-green-800');
-                } else if (type === 'error') {
-                    messageDiv.classList.add('bg-red-100', 'text-red-800');
-                } else { // info
-                    messageDiv.classList.add('bg-blue-100', 'text-blue-800');
-                }
-            }
+        document.querySelectorAll('.edit').forEach(btn => btn.addEventListener('click', editProduct));
+        document.querySelectorAll('.delete').forEach(btn => btn.addEventListener('click', deleteProduct));
+      }
 
-            // Função para fazer upload de imagem para o Supabase Storage
-            async function uploadImageToSupabase(file) {
-                console.log('Iniciando upload para Supabase Storage:', file.name);
-                const filePath = `${Date.now()}-${file.name}`; // Nome único para o arquivo
-                imageUploadStatus.textContent = `Enviando ${file.name}...`;
-                imageUploadStatus.classList.remove('text-red-800', 'text-green-800');
-                imageUploadStatus.classList.add('text-blue-800');
+      function searchProducts() {
+        const term = searchInput.value.toLowerCase();
+        const filtered = allProducts.filter(p =>
+          (p.name && p.name.toLowerCase().includes(term)) ||
+          (p.description && p.description.toLowerCase().includes(term))
+        );
+        displayProducts(filtered);
+      }
 
-                const { data, error } = await supabase.storage
-                    .from(SUPABASE_STORAGE_BUCKET)
-                    .upload(filePath, file, {
-                        cacheControl: '3600',
-                        upsert: false // Não sobrescrever se o arquivo já existir
-                    });
+      async function editProduct(e) {
+        const id = e.target.dataset.id;
+        const { data, error } = await supabase.from('produtos').select('*').eq('id', id).single();
+        if (error || !data) {
+          showMessage('Erro ao carregar produto.', 'error');
+          return;
+        }
 
-                if (error) {
-                    console.error('Erro ao fazer upload da imagem:', error);
-                    showMessage(`Erro ao enviar ${file.name}: ${error.message}`, 'error');
-                    imageUploadStatus.textContent = `Erro ao enviar ${file.name}: ${error.message}`;
-                    imageUploadStatus.classList.remove('text-blue-800');
-                    imageUploadStatus.classList.add('text-red-800');
-                    return null;
-                }
+        productIdInput.value = data.id;
+        productNameInput.value = data.name;
+        productDescriptionInput.value = data.description;
+        productPriceInput.value = data.price;
+        productCategorySelect.value = data.category;
+        productSupplierLinkInput.value = data.supplierLink;
+        productImageUrlInput.value = data.imageUrl;
+        imagePreview.src = data.imageUrl || '';
+        imagePreview.style.display = data.imageUrl ? 'block' : 'none';
+        productAdditionalImagesInput.value = data.additionalImages?.join(', ') || '';
 
-                console.log('Upload bem-sucedido, obtendo URL pública...');
-                // Obter a URL pública do arquivo
-                const { data: publicUrlData } = supabase.storage
-                    .from(SUPABASE_STORAGE_BUCKET)
-                    .getPublicUrl(filePath);
+        productFormTitle.textContent = 'Editar Produto';
+        submitProductBtn.textContent = 'Atualizar Produto';
+        cancelEditBtn.style.display = 'inline-block';
+      }
 
-                if (publicUrlData && publicUrlData.publicUrl) {
-                    console.log('URL pública obtida:', publicUrlData.publicUrl);
-                    imageUploadStatus.textContent = `${file.name} enviado com sucesso!`;
-                    imageUploadStatus.classList.remove('text-blue-800', 'text-red-800');
-                    imageUploadStatus.classList.add('text-green-800');
-                    return publicUrlData.publicUrl;
-                } else {
-                    console.error('Erro ao obter URL pública da imagem:', publicUrlData);
-                    imageUploadStatus.textContent = `Erro ao obter URL pública para ${file.name}.`;
-                    imageUploadStatus.classList.remove('text-blue-800');
-                    imageUploadStatus.classList.add('text-red-800');
-                    return null;
-                }
-            }
+      cancelEditBtn.addEventListener('click', () => {
+        productForm.reset();
+        productIdInput.value = '';
+        productFormTitle.textContent = 'Adicionar Novo Produto';
+        submitProductBtn.textContent = 'Salvar Produto';
+        cancelEditBtn.style.display = 'none';
+        imagePreview.style.display = 'none';
+      });
 
-            // --- Lógica de Drag and Drop ---
-            // Adiciona listeners apenas se os elementos forem encontrados
-            if (imageDropZone && fileInput && selectImageBtn) {
-                console.log('Adicionando listeners para Drag and Drop e seleção de arquivo.');
-                imageDropZone.addEventListener('dragover', (e) => {
-                    e.preventDefault(); // Previne o comportamento padrão (abrir arquivo no navegador)
-                    imageDropZone.classList.add('border-primary'); // Feedback visual
-                    console.log('Evento: dragover disparado.');
-                });
+      async function deleteProduct(e) {
+        const id = e.target.dataset.id;
+        if (!confirm('Tem certeza que deseja excluir?')) return;
 
-                imageDropZone.addEventListener('dragleave', (e) => {
-                    imageDropZone.classList.remove('border-primary'); // Remove feedback visual
-                    console.log('Evento: dragleave disparado.');
-                });
+        const { error } = await supabase.from('produtos').delete().eq('id', id);
+        if (error) {
+          showMessage('Erro ao excluir.', 'error');
+        } else {
+          showMessage('Produto excluído.', 'success');
+          loadProducts();
+        }
+      }
 
-                imageDropZone.addEventListener('drop', async (e) => {
-                    e.preventDefault();
-                    imageDropZone.classList.remove('border-primary');
-                    console.log('Evento: drop disparado.');
+      productForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const id = productIdInput.value;
+        const name = productNameInput.value.trim();
+        const description = productDescriptionInput.value.trim();
+        const price = parseFloat(productPriceInput.value);
+        const category = productCategorySelect.value.trim();
+        const supplierLink = productSupplierLinkInput.value.trim();
+        const imageUrl = productImageUrlInput.value.trim();
+        const additionalImages = productAdditionalImagesInput.value.split(',').map(u => u.trim()).filter(u => u);
 
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0) {
-                        console.log('Arquivos soltos:', files);
-                        let mainImageUploaded = false;
-                        let additionalImageUrls = [];
+        if (!name || !description || isNaN(price) || !category || !supplierLink || !imageUrl) {
+          showMessage('Preencha todos os campos obrigatórios.', 'error');
+          return;
+        }
 
-                        for (let i = 0; i < files.length; i++) {
-                            const file = files[i];
-                            if (file.type.startsWith('image/')) {
-                                const imageUrl = await uploadImageToSupabase(file);
-                                if (imageUrl) {
-                                    if (!mainImageUploaded) {
-                                        productImageUrlInput.value = imageUrl;
-                                        imagePreview.src = imageUrl;
-                                        imagePreview.style.display = 'block';
-                                        mainImageUploaded = true;
-                                    } else {
-                                        additionalImageUrls.push(imageUrl);
-                                    }
-                                }
-                            } else {
-                                showMessage(`Arquivo "${file.name}" não é uma imagem e foi ignorado.`, 'error');
-                                console.warn(`Arquivo "${file.name}" não é uma imagem.`);
-                            }
-                        }
+        const produto = { name, description, price, category, supplierLink, imageUrl, additionalImages };
+        let error;
 
-                        // Adiciona as URLs de imagens adicionais ao campo, mantendo as existentes se houver
-                        if (additionalImageUrls.length > 0) {
-                            const currentAdditionalImages = productAdditionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
-                            productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
-                        }
-                    } else {
-                        console.log('Nenhum arquivo solto.');
-                    }
-                });
+        if (id) {
+          ({ error } = await supabase.from('produtos').update(produto).eq('id', id));
+        } else {
+          ({ error } = await supabase.from('produtos').insert([produto]));
+        }
 
-                // Lidar com o clique no novo botão "Selecionar Imagem"
-                selectImageBtn.addEventListener('click', () => {
-                    console.log('Evento: click no botão "Selecionar Imagem", ativando input de arquivo.');
-                    fileInput.click(); // Ativa o input de arquivo oculto
-                });
-                
-                fileInput.addEventListener('change', async (e) => {
-                    console.log('Evento: change no input de arquivo disparado.');
-                    const files = e.target.files;
-                    if (files.length > 0) {
-                        console.log('Arquivos selecionados via input:', files);
-                        let mainImageUploaded = false;
-                        let additionalImageUrls = [];
+        if (error) {
+          showMessage('Erro ao salvar.', 'error');
+        } else {
+          showMessage(`Produto ${id ? 'atualizado' : 'adicionado'} com sucesso!`, 'success');
+          productForm.reset();
+          imagePreview.style.display = 'none';
+          cancelEditBtn.style.display = 'none';
+          productFormTitle.textContent = 'Adicionar Novo Produto';
+          submitProductBtn.textContent = 'Salvar Produto';
+          loadProducts();
+        }
+      });
 
-                        for (let i = 0; i < files.length; i++) {
-                            const file = files[i];
-                            if (file.type.startsWith('image/')) {
-                                const imageUrl = await uploadImageToSupabase(file);
-                                if (imageUrl) {
-                                    if (!mainImageUploaded) {
-                                        productImageUrlInput.value = imageUrl;
-                                        imagePreview.src = imageUrl;
-                                        imagePreview.style.display = 'block';
-                                        mainImageUploaded = true;
-                                    } else {
-                                        additionalImageUrls.push(imageUrl);
-                                    }
-                                }
-                            } else {
-                                showMessage(`Arquivo "${file.name}" não é uma imagem e foi ignorado.`, 'error');
-                                console.warn(`Arquivo "${file.name}" não é uma imagem.`);
-                            }
-                        }
-
-                        // Adiciona as URLs de imagens adicionais ao campo, mantendo as existentes se houver
-                        if (additionalImageUrls.length > 0) {
-                            const currentAdditionalImages = productAdditionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
-                            productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
-                        }
-                    } else {
-                        console.log('Nenhum arquivo selecionado via input.');
-                    }
-                });
-            } else {
-                console.error('Um ou mais elementos de upload de imagem não foram encontrados. Verifique os IDs HTML. imageDropZone, fileInput ou selectImageBtn são null.');
-            }
-
-
-            // --- Lógica de Gerenciamento de Produtos ---
-
-            // Função para carregar e exibir os produtos
-            async function loadProducts() {
-                productListDiv.innerHTML = ''; // Limpa a lista
-                noProductsMessage.style.display = 'none'; // Oculta a mensagem inicialmente
-                console.log('Tentando carregar produtos...');
-
-                const { data: products, error } = await supabase
-                    .from('produtos')
-                    .select('*')
-                    .order('name', { ascending: true }); // Ordena por nome
-
-                if (error) {
-                    console.error('Erro ao carregar produtos:', error);
-                    showMessage('Erro ao carregar produtos. Tente novamente.', 'error');
-                    return;
-                }
-
-                console.log('Produtos carregados:', products);
-                allProducts = products; // Armazena todos os produtos carregados
-                displayProducts(allProducts); // Exibe todos os produtos inicialmente
-            }
-
-            // Função para exibir produtos (usada por loadProducts e searchProducts)
-            function displayProducts(productsToDisplay) {
-                productListDiv.innerHTML = ''; // Limpa a lista
-                if (productsToDisplay.length === 0) {
-                    noProductsMessage.style.display = 'block';
-                    productListDiv.appendChild(noProductsMessage);
-                    return;
-                }
-
-                productsToDisplay.forEach(product => {
-                    const productCard = `
-                        <div class="product-item bg-gray-50 p-4 rounded-md shadow-sm flex items-center justify-between">
-                            <div>
-                                <h4 class="text-lg font-semibold">${product.name}</h4>
-                                <p class="text-sm text-gray-600">R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</p>
-                                <p class="text-xs text-gray-500">Categoria: ${product.category}</p>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button data-id="${product.id}" class="edit-product-btn bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors">Editar</button>
-                                <button data-id="${product.id}" class="delete-product-btn bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors">Excluir</button>
-                            </div>
-                        </div>
-                    `;
-                    productListDiv.insertAdjacentHTML('beforeend', productCard);
-                });
-
-                // Adiciona listeners para os botões de edição e exclusão
-                document.querySelectorAll('.edit-product-btn').forEach(button => {
-                    button.addEventListener('click', editProduct);
-                });
-                document.querySelectorAll('.delete-product-btn').forEach(button => {
-                    button.addEventListener('click', deleteProduct);
-                });
-            }
-
-            // Função para buscar produtos
-            function searchProducts() {
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                if (searchTerm === '') {
-                    displayProducts(allProducts); // Se a busca estiver vazia, exibe todos os produtos
-                    return;
-                }
-
-                const filteredProducts = allProducts.filter(product => {
-                    const productName = product.name ? product.name.toLowerCase() : '';
-                    const productDescription = product.description ? product.description.toLowerCase() : '';
-                    return productName.includes(searchTerm) || productDescription.includes(searchTerm);
-                });
-                displayProducts(filteredProducts);
-            }
-
-
-            // Função para preencher o formulário com dados de um produto para edição
-            async function editProduct(event) {
-                const productId = event.target.dataset.id;
-                console.log('Editando produto com ID:', productId);
-                const { data: product, error } = await supabase
-                    .from('produtos')
-                    .select('*')
-                    .eq('id', productId)
-                    .single();
-
-                if (error || !product) {
-                    console.error('Erro ao buscar produto para edição:', error);
-                    showMessage('Erro ao carregar dados do produto para edição.', 'error');
-                    return;
-                }
-
-                // Preenche o formulário
-                productIdInput.value = product.id;
-                productNameInput.value = product.name;
-                productDescriptionInput.value = product.description;
-                productPriceInput.value = parseFloat(product.price).toFixed(2);
-                productCategorySelect.value = product.category;
-                productSupplierLinkInput.value = product.supplierLink;
-                productImageUrlInput.value = product.imageUrl;
-                
-                // Exibe a pré-visualização da imagem principal se houver URL
-                if (product.imageUrl) {
-                    imagePreview.src = product.imageUrl;
-                    imagePreview.style.display = 'block';
-                    console.log('Pré-visualização da imagem definida para:', product.imageUrl);
-                } else {
-                    imagePreview.src = '';
-                    imagePreview.style.display = 'none';
-                    console.log('Nenhuma URL de imagem principal para pré-visualização.');
-                }
-
-                // Converte o array de imagens adicionais para string separada por vírgula
-                productAdditionalImagesInput.value = product.additionalImages ? product.additionalImages.join(', ') : '';
-
-                productFormTitle.textContent = 'Editar Produto';
-                submitProductBtn.textContent = 'Atualizar Produto';
-                cancelEditBtn.style.display = 'block'; // Mostra o botão de cancelar edição
-                showMessage('Formulário preenchido para edição.', 'info');
-            }
-
-            // Função para resetar o formulário de produto para adicionar novo
-            cancelEditBtn.addEventListener('click', () => {
-                productForm.reset();
-                productIdInput.value = ''; // Limpa o ID oculto
-                productFormTitle.textContent = 'Adicionar Novo Produto';
-                submitProductBtn.textContent = 'Salvar Produto';
-                cancelEditBtn.style.display = 'none';
-                imagePreview.src = ''; // Limpa a pré-visualização da imagem
-                imagePreview.style.display = 'none';
-                imageUploadStatus.textContent = ''; // Limpa o status de upload
-                showMessage('Formulário pronto para adicionar novo produto.', 'info');
-                console.log('Formulário resetado.');
-            });
-
-            // Função para excluir um produto
-            async function deleteProduct(event) {
-                const productId = event.target.dataset.id;
-                console.log('Tentando excluir produto com ID:', productId);
-                // Substituir confirm() por um modal customizado
-                if (!window.confirm('Tem certeza que deseja excluir este produto?')) { // Usando window.confirm temporariamente para teste
-                    return;
-                }
-
-                const { error } = await supabase
-                    .from('produtos')
-                    .delete()
-                    .eq('id', productId);
-
-                if (error) {
-                    console.error('Erro ao excluir produto:', error);
-                    showMessage(`Erro ao excluir produto: ${error.message}`, 'error');
-                } else {
-                    showMessage('Produto excluído com sucesso!', 'success');
-                    console.log('Produto excluído com sucesso.');
-                    loadProducts(); // Recarrega a lista após a exclusão
-                }
-            }
-
-            // Lidar com o envio do formulário de produto (Adicionar/Atualizar)
-            productForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                console.log('Formulário de produto enviado.');
-
-                const id = productIdInput.value; // Será vazio para novo produto, preenchido para edição
-                const name = productNameInput.value.trim();
-                const description = productDescriptionInput.value.trim();
-                const price = parseFloat(productPriceInput.value);
-                const category = productCategorySelect.value;
-                const supplierLink = productSupplierLinkInput.value.trim();
-                const imageUrl = productImageUrlInput.value.trim();
-                // Converte a string de URLs adicionais em um array, filtrando vazios
-                const additionalImages = productAdditionalImagesInput.value.trim()
-                                        .split(',')
-                                        .map(url => url.trim())
-                                        .filter(url => url !== '');
-
-                // Validação básica
-                if (!name || !description || isNaN(price) || price <= 0 || !category || !supplierLink || !imageUrl) {
-                    showMessage('Por favor, preencha todos os campos obrigatórios e verifique o preço.', 'error');
-                    console.error('Validação falhou: campos obrigatórios ausentes ou preço inválido.');
-                    return;
-                }
-
-                let operation;
-                let error;
-
-                if (id) {
-                    // Atualizar produto existente
-                    console.log('Atualizando produto existente com ID:', id);
-                    const { error: updateError } = await supabase
-                        .from('produtos')
-                        .update({
-                            name,
-                            description,
-                            price,
-                            category,
-                            supplierLink,
-                            imageUrl,
-                            additionalImages // Supabase aceita JSONB para arrays
-                        })
-                        .eq('id', id);
-                    error = updateError;
-                    operation = 'atualizado';
-                } else {
-                    // Adicionar novo produto
-                    console.log('Adicionando novo produto.');
-                    const { error: insertError } = await supabase
-                        .from('produtos')
-                        .insert([
-                            {
-                                name,
-                                description,
-                                price,
-                                category,
-                                supplierLink,
-                                imageUrl,
-                                additionalImages // Supabase aceita JSONB para arrays
-                            }
-                        ]);
-                    error = insertError;
-                    operation = 'adicionado';
-                }
-
-                if (error) {
-                    console.error(`Erro ao ${operation} produto:`, error);
-                    showMessage(`Erro ao ${operation} produto: ${error.message}`, 'error');
-                } else {
-                    showMessage(`Produto ${operation} com sucesso!`, 'success');
-                    console.log(`Produto ${operation} com sucesso!`);
-                    productForm.reset(); // Limpa o formulário
-                    productIdInput.value = ''; // Limpa o ID oculto
-                    productFormTitle.textContent = 'Adicionar Novo Produto';
-                    submitProductBtn.textContent = 'Salvar Produto';
-                    cancelEditBtn.style.display = 'none';
-                    imagePreview.src = ''; // Limpa a pré-visualização da imagem
-                    imagePreview.style.display = 'none';
-                    imageUploadStatus.textContent = ''; // Limpa o status de upload
-                    loadProducts(); // Recarrega a lista de produtos
-                }
-            });
-
-            // Adiciona o listener para o campo de busca
-            searchInput.addEventListener('keyup', searchProducts);
-
-            // Carrega os produtos quando o DOM estiver completamente carregado
-            loadProducts();
-        }); // Fim do DOMContentLoaded
-    </script>
+      searchInput.addEventListener('input', searchProducts);
+      loadProducts();
+    });
+  </script>
 </body>
 </html>
 
