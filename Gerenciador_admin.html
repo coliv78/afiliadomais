@@ -137,7 +137,7 @@
     <script>
         // --- Configuração do Supabase ---
         const SUPABASE_URL = 'https://euipmrgkumsrdumglfmx.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ1OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiWu9fM';         
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ1OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiLiWu9fM';         
         const SUPABASE_STORAGE_BUCKET = 'product-images'; // Nome do seu bucket no Supabase Storage
 
         let supabase; // Declara a variável supabase aqui
@@ -319,8 +319,8 @@
 
             // Lidar com a seleção de arquivos por clique
             imageDropZone.addEventListener('click', () => {
-                console.log('Evento: click na zona de drop, abrindo input de arquivo.');
-                fileInput.click();
+                console.log('Evento: click na zona de drop, ativando input de arquivo.');
+                fileInput.click(); // Ativa o input de arquivo oculto
             });
 
             fileInput.addEventListener('change', async (e) => {
