@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gerenciador - Minha Loja Afiliada</title>
+    <title>Cadastro de Administrador - Minha Loja Afiliada</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -27,54 +27,14 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     </style>
 </head>
-<body class="font-sans bg-background text-gray-800 antialiased">
+<body class="font-sans bg-background text-gray-800 antialiased flex items-center justify-center min-h-screen">
 
-    <!-- Cabeçalho (se você quiser manter o mesmo do seu site) -->
-    <header class="bg-primary text-white shadow-lg py-4">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <h1 class="text-3xl font-bold rounded-lg p-2">Minha Loja - Gerenciador</h1>
-            <nav>
-                <ul class="flex space-x-6">
-                    <li><a href="index.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Início</a></li>
-                    <!-- Adicione outros links de navegação se necessário -->
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Seção Principal do Gerenciador -->
     <main class="container mx-auto px-4 py-10">
-        <section id="auth-section" class="bg-card shadow-lg rounded-lg p-8 max-w-md mx-auto">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center" id="auth-title">Acessar Gerenciador</h2>
+        <section id="register-section" class="bg-card shadow-lg rounded-lg p-8 max-w-md mx-auto">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Cadastrar Novo Administrador</h2>
 
-            <!-- Formulário de Login -->
-            <form id="login-form" class="space-y-4">
-                <div>
-                    <label for="login-email" class="block text-sm font-medium text-gray-700">Email:</label>
-                    <input type="email" id="login-email" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                </div>
-                <div>
-                    <label for="login-password" class="block text-sm font-medium text-gray-700">Senha:</label>
-                    <input type="password" id="login-password" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                </div>
-                <div>
-                    <label for="login-admin-id" class="block text-sm font-medium text-gray-700">ID de Administrador (Opcional):</label>
-                    <input type="text" id="login-admin-id" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="Gerado automaticamente no cadastro" />
-                </div>
-                <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold">Entrar</button>
-            </form>
-
-            <div class="mt-6 text-center">
-                <p class="text-sm text-gray-600">
-                    Ainda não tem conta? <a href="#" id="show-register" class="text-primary hover:underline font-medium">Cadastre-se aqui</a>
-                </p>
-                <p class="text-sm text-gray-600 mt-2">
-                    Esqueceu seu login? <a href="#" id="show-recover" class="text-primary hover:underline font-medium">Recuperar acesso</a>
-                </p>
-            </div>
-
-            <!-- Formulário de Cadastro (Inicialmente oculto) -->
-            <form id="register-form" class="space-y-4 hidden">
+            <!-- Formulário de Cadastro -->
+            <form id="register-form" class="space-y-4">
                 <div>
                     <label for="register-email" class="block text-sm font-medium text-gray-700">Email:</label>
                     <input type="email" id="register-email" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
@@ -95,93 +55,14 @@
                 <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold">Cadastrar</button>
             </form>
 
-            <!-- Formulário de Recuperação de Senha (Inicialmente oculto) -->
-            <form id="recover-form" class="space-y-4 hidden">
-                <div>
-                    <label for="recover-email-or-id" class="block text-sm font-medium text-gray-700">Email ou ID de Administrador:</label>
-                    <input type="text" id="recover-email-or-id" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                </div>
-                <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold">Recuperar Senha</button>
-            </form>
-
             <div id="message" class="mt-4 p-3 text-sm rounded-md" style="display: none;"></div>
-        </section>
-
-        <!-- Conteúdo do Gerenciador (visível após o login) -->
-        <section id="manager-content" class="bg-card shadow-lg rounded-lg p-8 mt-8 hidden">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Bem-vindo ao Gerenciador!</h2>
-            <p class="text-gray-700 mb-8">Utilize os formulários abaixo para gerenciar os produtos da sua loja.</p>
-
-            <!-- Formulário de Adição/Edição de Produtos -->
-            <div class="mb-10 p-6 border border-border rounded-lg shadow-sm">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4" id="product-form-title">Adicionar Novo Produto</h3>
-                <form id="product-form" class="space-y-4">
-                    <input type="hidden" id="product-id"> <!-- Campo oculto para ID do produto em edição -->
-
-                    <div>
-                        <label for="product-name" class="block text-sm font-medium text-gray-700">Nome do Produto:</label>
-                        <input type="text" id="product-name" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                    </div>
-                    <div>
-                        <label for="product-description" class="block text-sm font-medium text-gray-700">Descrição:</label>
-                        <textarea id="product-description" rows="3" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required></textarea>
-                    </div>
-                    <div>
-                        <label for="product-price" class="block text-sm font-medium text-gray-700">Preço (R$):</label>
-                        <input type="number" step="0.01" id="product-price" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
-                    </div>
-                    <div>
-                        <label for="product-category" class="block text-sm font-medium text-gray-700">Categoria:</label>
-                        <select id="product-category" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required>
-                            <option value="">Selecione uma categoria</option>
-                            <option value="eletronicos">Eletrônicos</option>
-                            <option value="moda">Moda</option>
-                            <option value="casa">Casa</option>
-                            <option value="beleza">Beleza</option>
-                            <option value="esporte">Esporte</option>
-                            <option value="brinquedos">Brinquedos</option>
-                            <option value="outros">Outros</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="product-supplier-link" class="block text-sm font-medium text-gray-700">Link do Fornecedor (Afiliado):</label>
-                        <input type="url" id="product-supplier-link" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://loja.com/produto-afiliado" required />
-                    </div>
-                    <div>
-                        <label for="product-image-url" class="block text-sm font-medium text-gray-700">URL da Imagem Principal:</label>
-                        <input type="url" id="product-image-url" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://seusite.com/imagem.jpg" required />
-                    </div>
-                    <div>
-                        <label for="product-additional-images" class="block text-sm font-medium text-gray-700">URLs de Imagens Adicionais (separadas por vírgula):</label>
-                        <textarea id="product-additional-images" rows="2" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
-                        <p class="text-xs text-gray-500 mt-1">Insira URLs completas, separadas por vírgula.</p>
-                    </div>
-                    <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold" id="submit-product-btn">Salvar Produto</button>
-                    <button type="button" class="w-full bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors duration-300 font-semibold mt-2" id="cancel-edit-btn" style="display: none;">Cancelar Edição</button>
-                </form>
-            </div>
-
-            <!-- Lista de Produtos Existentes -->
-            <div class="p-6 border border-border rounded-lg shadow-sm">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Produtos Cadastrados</h3>
-                <div id="product-list" class="space-y-4">
-                    <p id="no-products-message" class="text-center text-gray-500">Nenhum produto cadastrado ainda.</p>
-                    <!-- Produtos serão carregados aqui -->
-                </div>
-            </div>
-
-            <button id="logout-button" class="mt-6 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors duration-300 font-semibold">Sair</button>
+            <p class="mt-4 text-center text-sm text-gray-600">
+                Já tem conta? <a href="gerenciador.html" class="text-primary hover:underline font-medium">Acessar Gerenciador</a>
+            </p>
         </section>
     </main>
 
-    <!-- Rodapé -->
-    <footer class="bg-gray-800 text-white py-6 mt-12">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-sm">&copy; 2025 Minha Loja Afiliada. Todos os direitos reservados.</p>
-        </div>
-    </footer>
-
-    <!-- Script JavaScript para o Supabase e Lógica de Autenticação e Gerenciamento -->
+    <!-- Script JavaScript para o Supabase e Lógica de Cadastro -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // --- Configuração do Supabase ---
@@ -191,45 +72,13 @@
         // Inicialize o cliente Supabase imediatamente após o carregamento do SDK
         const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- Referências aos Elementos HTML de Autenticação ---
-        const authTitle = document.getElementById('auth-title');
-        const loginForm = document.getElementById('login-form');
+        // --- Referências aos Elementos HTML ---
         const registerForm = document.getElementById('register-form');
-        const recoverForm = document.getElementById('recover-form');
-        const showRegisterBtn = document.getElementById('show-register');
-        const showRecoverBtn = document.getElementById('show-recover');
-        const authSection = document.getElementById('auth-section');
-        const managerContent = document.getElementById('manager-content');
-        const logoutButton = document.getElementById('logout-button');
-        const messageDiv = document.getElementById('message');
-
-        const loginEmailInput = document.getElementById('login-email');
-        const loginPasswordInput = document.getElementById('login-password');
-        const loginAdminIdInput = document.getElementById('login-admin-id');
-
         const registerEmailInput = document.getElementById('register-email');
         const registerPasswordInput = document.getElementById('register-password');
         const generatedAdminIdDisplay = document.getElementById('generated-admin-id-display');
         const adminIdValue = document.getElementById('admin-id-value');
-
-        const recoverEmailOrIdInput = document.getElementById('recover-email-or-id');
-
-        // --- Referências aos Elementos HTML de Gerenciamento de Produtos ---
-        const productForm = document.getElementById('product-form');
-        const productIdInput = document.getElementById('product-id');
-        const productNameInput = document.getElementById('product-name');
-        const productDescriptionInput = document.getElementById('product-description');
-        const productPriceInput = document.getElementById('product-price');
-        const productCategorySelect = document.getElementById('product-category');
-        const productSupplierLinkInput = document.getElementById('product-supplier-link');
-        const productImageUrlInput = document.getElementById('product-image-url');
-        const productAdditionalImagesInput = document.getElementById('product-additional-images');
-        const submitProductBtn = document.getElementById('submit-product-btn');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn');
-        const productFormTitle = document.getElementById('product-form-title');
-        const productListDiv = document.getElementById('product-list');
-        const noProductsMessage = document.getElementById('no-products-message');
-
+        const messageDiv = document.getElementById('message');
 
         // --- Regex para Validação de Senha ---
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
@@ -248,13 +97,6 @@
             }
         }
 
-        function hideForms() {
-            loginForm.classList.add('hidden');
-            registerForm.classList.add('hidden');
-            recoverForm.classList.add('hidden');
-            messageDiv.style.display = 'none';
-        }
-
         function generateAdminId(length = 16) {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_+=';
             let result = '';
@@ -264,100 +106,8 @@
             return result;
         }
 
-        // --- Lógica de Autenticação ---
-
-        // Função para verificar o estado da sessão
-        async function checkSession() {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (session) {
-                // Usuário logado, verificar se é um administrador
-                const { data: adminData, error: adminError } = await supabase
-                    .from('administradores') // Nome da sua nova tabela de administradores
-                    .select('admin_id')
-                    .eq('user_id', session.user.id)
-                    .single();
-
-                if (adminError || !adminData) {
-                    // Não é um administrador ou erro ao buscar, desloga
-                    console.error('Usuário logado não é um administrador ou erro ao buscar admin_id:', adminError);
-                    await supabase.auth.signOut();
-                    showMessage('Acesso negado. Você não é um administrador.', 'error');
-                    return;
-                }
-
-                // Usuário logado E é um administrador
-                hideForms();
-                authSection.classList.add('hidden'); // Esconde a seção de login/cadastro
-                managerContent.classList.remove('hidden');
-                loadProducts(); // Carrega os produtos quando o admin faz login
-            } else {
-                // Nenhum usuário logado
-                authSection.classList.remove('hidden'); // Mostra a seção de login/cadastro
-                managerContent.classList.add('hidden');
-                hideForms();
-                loginForm.classList.remove('hidden'); // Mostra o formulário de login por padrão
-                authTitle.textContent = 'Acessar Gerenciador';
-            }
-        }
-
-        // Evento de carregamento do DOM para inicializar Supabase e verificar a sessão
+        // --- Lógica de Cadastro de Administrador ---
         document.addEventListener('DOMContentLoaded', () => {
-            checkSession(); // Verifica a sessão após a inicialização do Supabase
-
-            // Evento para monitorar mudanças na sessão (login, logout, etc.)
-            supabase.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
-                    checkSession();
-                }
-            });
-
-            // Login de Administrador
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = loginEmailInput.value;
-                const password = loginPasswordInput.value;
-                const adminId = loginAdminIdInput.value.trim();
-
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password,
-                });
-
-                if (error) {
-                    showMessage(`Erro no login: ${error.message}`, 'error');
-                } else if (data.user) {
-                    const { data: adminData, error: adminError } = await supabase
-                        .from('administradores')
-                        .select('admin_id')
-                        .eq('user_id', data.user.id)
-                        .single();
-
-                    if (adminError || !adminData) {
-                        showMessage('Credenciais de administrador inválidas ou ID de administrador incorreto.', 'error');
-                        await supabase.auth.signOut();
-                        return;
-                    }
-
-                    if (adminId && adminData.admin_id !== adminId) {
-                        showMessage('ID de Administrador incorreto.', 'error');
-                        await supabase.auth.signOut();
-                        return;
-                    }
-
-                    showMessage('Login bem-sucedido!', 'success');
-                }
-            });
-
-            // Cadastro de Administrador
-            showRegisterBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                hideForms();
-                registerForm.classList.remove('hidden');
-                authTitle.textContent = 'Cadastrar Administrador';
-                generatedAdminIdDisplay.classList.add('hidden');
-                adminIdValue.textContent = '';
-            });
-
             registerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = registerEmailInput.value;
@@ -401,243 +151,7 @@
                     registerForm.reset();
                 }
             });
-
-            // Recuperação de Senha
-            showRecoverBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                hideForms();
-                recoverForm.classList.remove('hidden');
-                authTitle.textContent = 'Recuperar Acesso';
-            });
-
-            recoverForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const emailOrId = recoverEmailOrIdInput.value.trim();
-
-                let targetEmail = emailOrId;
-                if (!emailOrId.includes('@')) {
-                    const { data: adminData, error: adminError } = await supabase
-                        .from('administradores')
-                        .select('email')
-                        .eq('admin_id', emailOrId)
-                        .single();
-
-                    if (adminError || !adminData) {
-                        showMessage('ID de Administrador não encontrado ou erro ao buscar e-mail.', 'error');
-                        return;
-                    }
-                    targetEmail = adminData.email;
-                }
-
-                const { error } = await supabase.auth.resetPasswordForEmail(targetEmail, {
-                    redirectTo: window.location.origin + '/nova_senha_admin.html',
-                });
-
-                if (error) {
-                    showMessage(`Erro na recuperação: ${error.message}`, 'error');
-                } else {
-                    showMessage('Link de recuperação enviado para o seu e-mail (se cadastrado)! Verifique sua caixa de entrada.', 'info');
-                }
-            });
-
-            // Logout
-            logoutButton.addEventListener('click', async () => {
-                const { error } = await supabase.auth.signOut();
-                if (error) {
-                    showMessage(`Erro ao sair: ${error.message}`, 'error');
-                } else {
-                    showMessage('Sessão encerrada com sucesso.', 'success');
-                }
-            });
-
-            // --- Lógica de Gerenciamento de Produtos ---
-
-            // Função para carregar e exibir os produtos
-            async function loadProducts() {
-                productListDiv.innerHTML = ''; // Limpa a lista
-                noProductsMessage.style.display = 'none'; // Oculta a mensagem inicialmente
-
-                const { data: products, error } = await supabase
-                    .from('produtos')
-                    .select('*')
-                    .order('name', { ascending: true }); // Ordena por nome
-
-                if (error) {
-                    console.error('Erro ao carregar produtos:', error);
-                    showMessage('Erro ao carregar produtos. Tente novamente.', 'error');
-                    return;
-                }
-
-                if (products.length === 0) {
-                    noProductsMessage.style.display = 'block';
-                    productListDiv.appendChild(noProductsMessage);
-                    return;
-                }
-
-                products.forEach(product => {
-                    const productCard = `
-                        <div class="product-item bg-gray-50 p-4 rounded-md shadow-sm flex items-center justify-between">
-                            <div>
-                                <h4 class="text-lg font-semibold">${product.name}</h4>
-                                <p class="text-sm text-gray-600">R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</p>
-                                <p class="text-xs text-gray-500">Categoria: ${product.category}</p>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button data-id="${product.id}" class="edit-product-btn bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors">Editar</button>
-                                <button data-id="${product.id}" class="delete-product-btn bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors">Excluir</button>
-                            </div>
-                        </div>
-                    `;
-                    productListDiv.insertAdjacentHTML('beforeend', productCard);
-                });
-
-                // Adiciona listeners para os botões de edição e exclusão
-                document.querySelectorAll('.edit-product-btn').forEach(button => {
-                    button.addEventListener('click', editProduct);
-                });
-                document.querySelectorAll('.delete-product-btn').forEach(button => {
-                    button.addEventListener('click', deleteProduct);
-                });
-            }
-
-            // Função para preencher o formulário com dados de um produto para edição
-            async function editProduct(event) {
-                const productId = event.target.dataset.id;
-                const { data: product, error } = await supabase
-                    .from('produtos')
-                    .select('*')
-                    .eq('id', productId)
-                    .single();
-
-                if (error || !product) {
-                    console.error('Erro ao buscar produto para edição:', error);
-                    showMessage('Erro ao carregar dados do produto para edição.', 'error');
-                    return;
-                }
-
-                // Preenche o formulário
-                productIdInput.value = product.id;
-                productNameInput.value = product.name;
-                productDescriptionInput.value = product.description;
-                productPriceInput.value = parseFloat(product.price).toFixed(2);
-                productCategorySelect.value = product.category;
-                productSupplierLinkInput.value = product.supplierLink;
-                productImageUrlInput.value = product.imageUrl;
-                // Converte o array de imagens adicionais para string separada por vírgula
-                productAdditionalImagesInput.value = product.additionalImages ? product.additionalImages.join(', ') : '';
-
-                productFormTitle.textContent = 'Editar Produto';
-                submitProductBtn.textContent = 'Atualizar Produto';
-                cancelEditBtn.style.display = 'block'; // Mostra o botão de cancelar edição
-                showMessage('Formulário preenchido para edição.', 'info');
-            }
-
-            // Função para resetar o formulário de produto para adicionar novo
-            cancelEditBtn.addEventListener('click', () => {
-                productForm.reset();
-                productIdInput.value = ''; // Limpa o ID oculto
-                productFormTitle.textContent = 'Adicionar Novo Produto';
-                submitProductBtn.textContent = 'Salvar Produto';
-                cancelEditBtn.style.display = 'none';
-                showMessage('Formulário pronto para adicionar novo produto.', 'info');
-            });
-
-            // Função para excluir um produto
-            async function deleteProduct(event) {
-                const productId = event.target.dataset.id;
-                if (!confirm('Tem certeza que deseja excluir este produto?')) {
-                    return;
-                }
-
-                const { error } = await supabase
-                    .from('produtos')
-                    .delete()
-                    .eq('id', productId);
-
-                if (error) {
-                    console.error('Erro ao excluir produto:', error);
-                    showMessage(`Erro ao excluir produto: ${error.message}`, 'error');
-                } else {
-                    showMessage('Produto excluído com sucesso!', 'success');
-                    loadProducts(); // Recarrega a lista após a exclusão
-                }
-            }
-
-            // Lidar com o envio do formulário de produto (Adicionar/Atualizar)
-            productForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const id = productIdInput.value; // Será vazio para novo produto, preenchido para edição
-                const name = productNameInput.value.trim();
-                const description = productDescriptionInput.value.trim();
-                const price = parseFloat(productPriceInput.value);
-                const category = productCategorySelect.value;
-                const supplierLink = productSupplierLinkInput.value.trim();
-                const imageUrl = productImageUrlInput.value.trim();
-                // Converte a string de URLs adicionais em um array, filtrando vazios
-                const additionalImages = productAdditionalImagesInput.value.trim()
-                                        .split(',')
-                                        .map(url => url.trim())
-                                        .filter(url => url !== '');
-
-                // Validação básica
-                if (!name || !description || isNaN(price) || price <= 0 || !category || !supplierLink || !imageUrl) {
-                    showMessage('Por favor, preencha todos os campos obrigatórios e verifique o preço.', 'error');
-                    return;
-                }
-
-                let operation;
-                let error;
-
-                if (id) {
-                    // Atualizar produto existente
-                    const { error: updateError } = await supabase
-                        .from('produtos')
-                        .update({
-                            name,
-                            description,
-                            price,
-                            category,
-                            supplierLink,
-                            imageUrl,
-                            additionalImages // Supabase aceita JSONB para arrays
-                        })
-                        .eq('id', id);
-                    error = updateError;
-                    operation = 'atualizado';
-                } else {
-                    // Adicionar novo produto
-                    const { error: insertError } = await supabase
-                        .from('produtos')
-                        .insert([
-                            {
-                                name,
-                                description,
-                                price,
-                                category,
-                                supplierLink,
-                                imageUrl,
-                                additionalImages // Supabase aceita JSONB para arrays
-                            }
-                        ]);
-                    error = insertError;
-                    operation = 'adicionado';
-                }
-
-                if (error) {
-                    console.error(`Erro ao ${operation} produto:`, error);
-                    showMessage(`Erro ao ${operation} produto: ${error.message}`, 'error');
-                } else {
-                    showMessage(`Produto ${operation} com sucesso!`, 'success');
-                    productForm.reset(); // Limpa o formulário
-                    productIdInput.value = ''; // Limpa o ID oculto
-                    productFormTitle.textContent = 'Adicionar Novo Produto';
-                    submitProductBtn.textContent = 'Salvar Produto';
-                    cancelEditBtn.style.display = 'none';
-                    loadProducts(); // Recarrega a lista de produtos
-                }
-            });
-        }); // Fim do DOMContentLoaded
+        });
     </script>
 </body>
 </html>
