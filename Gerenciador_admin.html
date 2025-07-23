@@ -174,6 +174,7 @@
             try {
                 await waitForSupabase();
                 supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('Supabase client inicializado com sucesso!');
             } catch (error) {
                 console.error("Erro crítico: Não foi possível carregar o SDK do Supabase.", error);
                 showMessage("Erro crítico: O sistema não pôde ser carregado. Verifique sua conexão com a internet ou entre em contato com o suporte.", 'error');
@@ -221,6 +222,7 @@
 
             // Função para fazer upload de imagem para o Supabase Storage
             async function uploadImageToSupabase(file) {
+                console.log('Iniciando upload para Supabase Storage:', file.name);
                 const filePath = `${Date.now()}-${file.name}`; // Nome único para o arquivo
                 imageUploadStatus.textContent = `Enviando ${file.name}...`;
                 imageUploadStatus.classList.remove('text-red-800', 'text-green-800');
@@ -241,12 +243,14 @@
                     return null;
                 }
 
+                console.log('Upload bem-sucedido, obtendo URL pública...');
                 // Obter a URL pública do arquivo
                 const { data: publicUrlData } = supabase.storage
                     .from(SUPABASE_STORAGE_BUCKET)
                     .getPublicUrl(filePath);
 
                 if (publicUrlData && publicUrlData.publicUrl) {
+                    console.log('URL pública obtida:', publicUrlData.publicUrl);
                     imageUploadStatus.textContent = `${file.name} enviado com sucesso!`;
                     imageUploadStatus.classList.remove('text-blue-800', 'text-red-800');
                     imageUploadStatus.classList.add('text-green-800');
@@ -264,18 +268,22 @@
             imageDropZone.addEventListener('dragover', (e) => {
                 e.preventDefault(); // Previne o comportamento padrão (abrir arquivo no navegador)
                 imageDropZone.classList.add('border-primary'); // Feedback visual
+                console.log('Evento: dragover');
             });
 
             imageDropZone.addEventListener('dragleave', (e) => {
                 imageDropZone.classList.remove('border-primary'); // Remove feedback visual
+                console.log('Evento: dragleave');
             });
 
             imageDropZone.addEventListener('drop', async (e) => {
                 e.preventDefault();
                 imageDropZone.classList.remove('border-primary');
+                console.log('Evento: drop');
 
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
+                    console.log('Arquivos soltos:', files);
                     let mainImageUploaded = false;
                     let additionalImageUrls = [];
 
@@ -295,6 +303,7 @@
                             }
                         } else {
                             showMessage(`Arquivo "${file.name}" não é uma imagem e foi ignorado.`, 'error');
+                            console.warn(`Arquivo "${file.name}" não é uma imagem.`);
                         }
                     }
 
@@ -303,17 +312,22 @@
                         const currentAdditionalImages = productAdditionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
                         productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
                     }
+                } else {
+                    console.log('Nenhum arquivo solto.');
                 }
             });
 
             // Lidar com a seleção de arquivos por clique
             imageDropZone.addEventListener('click', () => {
+                console.log('Evento: click na zona de drop, abrindo input de arquivo.');
                 fileInput.click();
             });
 
             fileInput.addEventListener('change', async (e) => {
+                console.log('Evento: change no input de arquivo.');
                 const files = e.target.files;
                 if (files.length > 0) {
+                    console.log('Arquivos selecionados:', files);
                     let mainImageUploaded = false;
                     let additionalImageUrls = [];
 
@@ -333,6 +347,7 @@
                             }
                         } else {
                             showMessage(`Arquivo "${file.name}" não é uma imagem e foi ignorado.`, 'error');
+                            console.warn(`Arquivo "${file.name}" não é uma imagem.`);
                         }
                     }
 
@@ -341,6 +356,8 @@
                         const currentAdditionalImages = productAdditionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
                         productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
                     }
+                } else {
+                    console.log('Nenhum arquivo selecionado.');
                 }
             });
 
@@ -351,6 +368,7 @@
             async function loadProducts() {
                 productListDiv.innerHTML = ''; // Limpa a lista
                 noProductsMessage.style.display = 'none'; // Oculta a mensagem inicialmente
+                console.log('Tentando carregar produtos...');
 
                 const { data: products, error } = await supabase
                     .from('produtos')
@@ -363,6 +381,7 @@
                     return;
                 }
 
+                console.log('Produtos carregados:', products);
                 allProducts = products; // Armazena todos os produtos carregados
                 displayProducts(allProducts); // Exibe todos os produtos inicialmente
             }
@@ -422,6 +441,7 @@
             // Função para preencher o formulário com dados de um produto para edição
             async function editProduct(event) {
                 const productId = event.target.dataset.id;
+                console.log('Editando produto com ID:', productId);
                 const { data: product, error } = await supabase
                     .from('produtos')
                     .select('*')
@@ -447,9 +467,11 @@
                 if (product.imageUrl) {
                     imagePreview.src = product.imageUrl;
                     imagePreview.style.display = 'block';
+                    console.log('Pré-visualização da imagem definida para:', product.imageUrl);
                 } else {
                     imagePreview.src = '';
                     imagePreview.style.display = 'none';
+                    console.log('Nenhuma URL de imagem principal para pré-visualização.');
                 }
 
                 // Converte o array de imagens adicionais para string separada por vírgula
@@ -472,11 +494,13 @@
                 imagePreview.style.display = 'none';
                 imageUploadStatus.textContent = ''; // Limpa o status de upload
                 showMessage('Formulário pronto para adicionar novo produto.', 'info');
+                console.log('Formulário resetado.');
             });
 
             // Função para excluir um produto
             async function deleteProduct(event) {
                 const productId = event.target.dataset.id;
+                console.log('Tentando excluir produto com ID:', productId);
                 // Substituir confirm() por um modal customizado
                 if (!window.confirm('Tem certeza que deseja excluir este produto?')) { // Usando window.confirm temporariamente para teste
                     return;
@@ -492,6 +516,7 @@
                     showMessage(`Erro ao excluir produto: ${error.message}`, 'error');
                 } else {
                     showMessage('Produto excluído com sucesso!', 'success');
+                    console.log('Produto excluído com sucesso.');
                     loadProducts(); // Recarrega a lista após a exclusão
                 }
             }
@@ -499,6 +524,7 @@
             // Lidar com o envio do formulário de produto (Adicionar/Atualizar)
             productForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                console.log('Formulário de produto enviado.');
 
                 const id = productIdInput.value; // Será vazio para novo produto, preenchido para edição
                 const name = productNameInput.value.trim();
@@ -516,6 +542,7 @@
                 // Validação básica
                 if (!name || !description || isNaN(price) || price <= 0 || !category || !supplierLink || !imageUrl) {
                     showMessage('Por favor, preencha todos os campos obrigatórios e verifique o preço.', 'error');
+                    console.error('Validação falhou: campos obrigatórios ausentes ou preço inválido.');
                     return;
                 }
 
@@ -524,6 +551,7 @@
 
                 if (id) {
                     // Atualizar produto existente
+                    console.log('Atualizando produto existente com ID:', id);
                     const { error: updateError } = await supabase
                         .from('produtos')
                         .update({
@@ -540,6 +568,7 @@
                     operation = 'atualizado';
                 } else {
                     // Adicionar novo produto
+                    console.log('Adicionando novo produto.');
                     const { error: insertError } = await supabase
                         .from('produtos')
                         .insert([
@@ -562,6 +591,7 @@
                     showMessage(`Erro ao ${operation} produto: ${error.message}`, 'error');
                 } else {
                     showMessage(`Produto ${operation} com sucesso!`, 'success');
+                    console.log(`Produto ${operation} com sucesso!`);
                     productForm.reset(); // Limpa o formulário
                     productIdInput.value = ''; // Limpa o ID oculto
                     productFormTitle.textContent = 'Adicionar Novo Produto';
