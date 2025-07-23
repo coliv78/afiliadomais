@@ -40,6 +40,12 @@
         #image-drop-zone {
             position: relative;
             overflow: hidden; /* Garante que o input oculto não "vaze" */
+            display: flex; /* Usar flexbox para centralizar o conteúdo */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem; /* Ajuste o padding para dar espaço */
+            min-height: 150px; /* Altura mínima para facilitar a interação */
         }
     </style>
 </head>
@@ -155,7 +161,7 @@
     <script>
         // --- Configuração do Supabase ---
         const SUPABASE_URL = 'https://euipmrgkumsrdumglfmx.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ1OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiLiWu9fM';         
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ1OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiWu9fM';         
         const SUPABASE_STORAGE_BUCKET = 'product-images'; // Nome do seu bucket no Supabase Storage
 
         let supabase; // Declara a variável supabase aqui
@@ -222,6 +228,14 @@
             const imageUploadStatus = document.getElementById('image-upload-status');
             const selectImageBtn = document.getElementById('select-image-btn'); // Novo botão
 
+            // Adicionar logs para verificar se os elementos são encontrados
+            console.log('Elementos HTML referenciados:');
+            console.log('imageDropZone:', imageDropZone);
+            console.log('fileInput:', fileInput);
+            console.log('imagePreview:', imagePreview);
+            console.log('selectImageBtn:', selectImageBtn);
+
+
             // Referência para o campo de busca
             const searchInput = document.getElementById('search-input');
 
@@ -256,6 +270,7 @@
 
                 if (error) {
                     console.error('Erro ao fazer upload da imagem:', error);
+                    showMessage(`Erro ao enviar ${file.name}: ${error.message}`, 'error');
                     imageUploadStatus.textContent = `Erro ao enviar ${file.name}: ${error.message}`;
                     imageUploadStatus.classList.remove('text-blue-800');
                     imageUploadStatus.classList.add('text-red-800');
@@ -284,108 +299,113 @@
             }
 
             // --- Lógica de Drag and Drop ---
-            imageDropZone.addEventListener('dragover', (e) => {
-                e.preventDefault(); // Previne o comportamento padrão (abrir arquivo no navegador)
-                imageDropZone.classList.add('border-primary'); // Feedback visual
-                console.log('Evento: dragover');
-            });
+            if (imageDropZone) { // Verifica se o elemento existe antes de adicionar listeners
+                imageDropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault(); // Previne o comportamento padrão (abrir arquivo no navegador)
+                    imageDropZone.classList.add('border-primary'); // Feedback visual
+                    console.log('Evento: dragover');
+                });
 
-            imageDropZone.addEventListener('dragleave', (e) => {
-                imageDropZone.classList.remove('border-primary'); // Remove feedback visual
-                console.log('Evento: dragleave');
-            });
+                imageDropZone.addEventListener('dragleave', (e) => {
+                    imageDropZone.classList.remove('border-primary'); // Remove feedback visual
+                    console.log('Evento: dragleave');
+                });
 
-            imageDropZone.addEventListener('drop', async (e) => {
-                e.preventDefault();
-                imageDropZone.classList.remove('border-primary');
-                console.log('Evento: drop');
+                imageDropZone.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    imageDropZone.classList.remove('border-primary');
+                    console.log('Evento: drop');
 
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    console.log('Arquivos soltos:', files);
-                    let mainImageUploaded = false;
-                    let additionalImageUrls = [];
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        console.log('Arquivos soltos:', files);
+                        let mainImageUploaded = false;
+                        let additionalImageUrls = [];
 
-                    for (let i = 0; i < files.length; i++) {
-                        const file = files[i];
-                        if (file.type.startsWith('image/')) {
-                            const imageUrl = await uploadImageToSupabase(file);
-                            if (imageUrl) {
-                                if (!mainImageUploaded) {
-                                    productImageUrlInput.value = imageUrl;
-                                    imagePreview.src = imageUrl;
-                                    imagePreview.style.display = 'block';
-                                    mainImageUploaded = true;
-                                } else {
-                                    additionalImageUrls.push(imageUrl);
+                        for (let i = 0; i < files.length; i++) {
+                            const file = files[i];
+                            if (file.type.startsWith('image/')) {
+                                const imageUrl = await uploadImageToSupabase(file);
+                                if (imageUrl) {
+                                    if (!mainImageUploaded) {
+                                        productImageUrlInput.value = imageUrl;
+                                        imagePreview.src = imageUrl;
+                                        imagePreview.style.display = 'block';
+                                        mainImageUploaded = true;
+                                    } else {
+                                        additionalImageUrls.push(imageUrl);
+                                    }
                                 }
+                            } else {
+                                showMessage(`Arquivo "${file.name}" não é uma imagem e foi ignorado.`, 'error');
+                                console.warn(`Arquivo "${file.name}" não é uma imagem.`);
                             }
-                        } else {
-                            showMessage(`Arquivo "${file.name}" não é uma imagem e foi ignorado.`, 'error');
-                            console.warn(`Arquivo "${file.name}" não é uma imagem.`);
                         }
-                    }
 
-                    // Adiciona as URLs de imagens adicionais ao campo, mantendo as existentes se houver
-                    if (additionalImageUrls.length > 0) {
-                        const currentAdditionalImages = productAdditionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
-                        productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
+                        // Adiciona as URLs de imagens adicionais ao campo, mantendo as existentes se houver
+                        if (additionalImageUrls.length > 0) {
+                            const currentAdditionalImages = productAdditionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
+                            productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
+                        }
+                    } else {
+                        console.log('Nenhum arquivo solto.');
                     }
-                } else {
-                    console.log('Nenhum arquivo solto.');
-                }
-            });
-
-            // Lidar com a seleção de arquivos por clique na zona de drop
-            // O input de arquivo agora está sobre a zona de drop, então o clique direto nele funciona
-            // imageDropZone.addEventListener('click', () => {
-            //     console.log('Evento: click na zona de drop, ativando input de arquivo.');
-            //     fileInput.click(); // Ativa o input de arquivo oculto
-            // });
+                });
+            } else {
+                console.error('Elemento imageDropZone não encontrado!');
+            }
 
             // Lidar com o clique no novo botão "Selecionar Imagem"
-            selectImageBtn.addEventListener('click', () => {
-                console.log('Evento: click no botão "Selecionar Imagem", ativando input de arquivo.');
-                fileInput.click(); // Ativa o input de arquivo oculto
-            });
+            if (selectImageBtn) {
+                selectImageBtn.addEventListener('click', () => {
+                    console.log('Evento: click no botão "Selecionar Imagem", ativando input de arquivo.');
+                    fileInput.click(); // Ativa o input de arquivo oculto
+                });
+            } else {
+                console.error('Elemento selectImageBtn não encontrado!');
+            }
+            
+            if (fileInput) {
+                fileInput.addEventListener('change', async (e) => {
+                    console.log('Evento: change no input de arquivo.');
+                    const files = e.target.files;
+                    if (files.length > 0) {
+                        console.log('Arquivos selecionados:', files);
+                        let mainImageUploaded = false;
+                        let additionalImageUrls = [];
 
-            fileInput.addEventListener('change', async (e) => {
-                console.log('Evento: change no input de arquivo.');
-                const files = e.target.files;
-                if (files.length > 0) {
-                    console.log('Arquivos selecionados:', files);
-                    let mainImageUploaded = false;
-                    let additionalImageUrls = [];
-
-                    for (let i = 0; i < files.length; i++) {
-                        const file = files[i];
-                        if (file.type.startsWith('image/')) {
-                            const imageUrl = await uploadImageToSupabase(file);
-                            if (imageUrl) {
-                                if (!mainImageUploaded) {
-                                    productImageUrlInput.value = imageUrl;
-                                    imagePreview.src = imageUrl;
-                                    imagePreview.style.display = 'block';
-                                    mainImageUploaded = true;
-                                } else {
-                                    additionalImageUrls.push(imageUrl);
+                        for (let i = 0; i < files.length; i++) {
+                            const file = files[i];
+                            if (file.type.startsWith('image/')) {
+                                const imageUrl = await uploadImageToSupabase(file);
+                                if (imageUrl) {
+                                    if (!mainImageUploaded) {
+                                        productImageUrlInput.value = imageUrl;
+                                        imagePreview.src = imageUrl;
+                                        imagePreview.style.display = 'block';
+                                        mainImageUploaded = true;
+                                    } else {
+                                        additionalImageUrls.push(imageUrl);
+                                    }
                                 }
+                            } else {
+                                showMessage(`Arquivo "${file.name}" não é uma imagem e foi ignorado.`, 'error');
+                                console.warn(`Arquivo "${file.name}" não é uma imagem.`);
                             }
-                        } else {
-                            showMessage(`Arquivo "${file.name}" não é uma imagem e foi ignorado.`, 'error');
-                            console.warn(`Arquivo "${file.name}" não é uma imagem.`);
                         }
-                    }
 
-                    // Adiciona as URLs de imagens adicionais ao campo, mantendo as existentes se houver
-                    if (additionalImageUrls.length > 0) {
-                        const currentAdditionalImages = productAdditionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
-                        productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
+                        // Adiciona as URLs de imagens adicionais ao campo, mantendo as existentes se houver
+                        if (additionalImageUrls.length > 0) {
+                            const currentAdditionalImages = productAdditionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
+                            productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
+                        }
+                    } else {
+                        console.log('Nenhum arquivo selecionado.');
                     }
-                } else {
-                    console.log('Nenhum arquivo selecionado.');
-                }
-            });
+                });
+            } else {
+                console.error('Elemento fileInput não encontrado!');
+            }
 
 
             // --- Lógica de Gerenciamento de Produtos ---
@@ -639,5 +659,3 @@
     </script>
 </body>
 </html>
-
-
