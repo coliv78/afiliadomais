@@ -25,6 +25,22 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Estilos para o input de arquivo oculto, para garantir que seja clicável mas invisível */
+        #file-input {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+            z-index: 10; /* Garante que esteja acima de outros elementos na zona de drop */
+        }
+        /* Ajuste para a zona de drop para que o input de arquivo fique por cima */
+        #image-drop-zone {
+            position: relative;
+            overflow: hidden; /* Garante que o input oculto não "vaze" */
+        }
     </style>
 </head>
 <body class="font-sans bg-background text-gray-800 antialiased">
@@ -89,8 +105,10 @@
                         <input type="url" id="product-image-url" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://seusite.com/imagem.jpg" required />
                     </div>
                     <div id="image-drop-zone" class="mt-4 p-6 border-2 border-dashed border-border rounded-md text-center cursor-pointer hover:border-primary transition-colors duration-300">
-                        <p class="text-gray-600 mb-2">Arraste e solte imagens aqui ou clique para selecionar</p>
-                        <input type="file" id="file-input" class="hidden" accept="image/*" multiple />
+                        <p class="text-gray-600 mb-2">Arraste e solte imagens aqui</p>
+                        <!-- O input de arquivo agora está sobre a zona de drop, mas invisível -->
+                        <input type="file" id="file-input" accept="image/*" multiple /> 
+                        <button type="button" id="select-image-btn" class="mt-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-300 font-semibold">Ou clique para selecionar</button>
                         <img id="image-preview" src="" alt="Pré-visualização da Imagem" class="max-w-full h-32 mx-auto mt-2 object-contain rounded-md" style="display: none;" />
                         <p id="image-upload-status" class="text-sm mt-2"></p>
                     </div>
@@ -202,6 +220,7 @@
             const fileInput = document.getElementById('file-input');
             const imagePreview = document.getElementById('image-preview');
             const imageUploadStatus = document.getElementById('image-upload-status');
+            const selectImageBtn = document.getElementById('select-image-btn'); // Novo botão
 
             // Referência para o campo de busca
             const searchInput = document.getElementById('search-input');
@@ -317,9 +336,16 @@
                 }
             });
 
-            // Lidar com a seleção de arquivos por clique
-            imageDropZone.addEventListener('click', () => {
-                console.log('Evento: click na zona de drop, ativando input de arquivo.');
+            // Lidar com a seleção de arquivos por clique na zona de drop
+            // O input de arquivo agora está sobre a zona de drop, então o clique direto nele funciona
+            // imageDropZone.addEventListener('click', () => {
+            //     console.log('Evento: click na zona de drop, ativando input de arquivo.');
+            //     fileInput.click(); // Ativa o input de arquivo oculto
+            // });
+
+            // Lidar com o clique no novo botão "Selecionar Imagem"
+            selectImageBtn.addEventListener('click', () => {
+                console.log('Evento: click no botão "Selecionar Imagem", ativando input de arquivo.');
                 fileInput.click(); // Ativa o input de arquivo oculto
             });
 
@@ -613,4 +639,5 @@
     </script>
 </body>
 </html>
+
 
