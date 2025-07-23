@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Casa - Minha Loja Afiliada</title>
     
-    <!-- Inclui o CDN do Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Configuração do Tailwind para usar a fonte Inter e cores personalizadas -->
     <script>
         tailwind.config = {
             theme: {
@@ -27,7 +25,6 @@
             }
         }
     </script>
-    <!-- Importa a fonte 'Inter' do Google Fonts -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         /* Estilos para o modal de imagem */
@@ -126,10 +123,10 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="font-sans bg-background text-gray-800 antialiased">
 
-    <!-- Cabeçalho da Página -->
     <header class="bg-primary text-white shadow-lg py-4">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <h1 class="text-3xl font-bold rounded-lg p-2">Minha Loja</h1>
@@ -143,7 +140,7 @@
                     <li><a href="esporte.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Esporte</a></li>
                     <li><a href="brinquedos.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Brinquedos</a></li>
                     <li><a href="outros.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Outros</a></li>
-                    
+                    <li><a href="cadastro.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Cadastro</a></li>
                     <li><a href="politicas.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Políticas</a></li>
                 </ul>
             </nav>
@@ -164,7 +161,6 @@
     <section id="casa-produtos" class="produtos-container container mx-auto px-4 py-12">
         <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Casa</h2>
         <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            <!-- Produtos serão carregados aqui via JavaScript -->
             <p id="noProductsMessage" class="text-center text-gray-500 col-span-full">Nenhum produto nesta categoria ainda.</p>
         </div>
     </section>
@@ -175,7 +171,6 @@
         </div>
     </footer>
 
-    <!-- Modal de Imagem -->
     <div id="imageModal" class="modal-overlay">
         <div class="modal-content">
             <img id="modalImage" src="" alt="Imagem do Produto" class="modal-image">
@@ -186,7 +181,11 @@
     </div>
 
     <script>
-        const LOCAL_STORAGE_KEY = 'minhaLojaProdutos';
+        // **Suas credenciais do Supabase**
+        const SUPABASE_URL = 'https://euipmrgkumsrdumglfmx.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ1OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiWu9fM';         
+        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const CATEGORY_NAME = 'casa'; // Define a categoria específica para esta página
 
         const productListDiv = document.getElementById('productList');
@@ -203,19 +202,32 @@
         let currentImages = []; // Array de URLs de imagens para o produto atual
         let currentImageIndex = 0; // Índice da imagem atualmente exibida no modal
 
-        // Função para carregar e exibir os produtos do localStorage, filtrados por categoria
-        function loadProductsForDisplay(searchTerm = '') {
-            const products = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+        // Função para carregar e exibir os produtos do Supabase, filtrados por categoria
+        async function loadProductsForDisplay(searchTerm = '') {
             productListDiv.innerHTML = ''; // Limpa a lista antes de carregar
 
-            // Filtra os produtos pela categoria específica E pelo termo de busca
-            const filteredProducts = products.filter(product => 
-                (product.category && product.category.toLowerCase() === CATEGORY_NAME.toLowerCase()) &&
-                (product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.description.toLowerCase().includes(searchTerm.toLowerCase()))
-            );
+            let query = supabase
+                .from('produtos')
+                .select('*')
+                .eq('category', CATEGORY_NAME); // Filtra pela categoria específica
 
-            if (filteredProducts.length === 0) {
+            if (searchTerm) {
+                // Adiciona a busca por nome ou descrição (case-insensitive)
+                query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+            }
+
+            const { data: products, error } = await query.order('name', { ascending: true }); // Ordena por nome
+
+            if (error) {
+                console.error('Erro ao carregar produtos do Supabase para categoria Casa:', error);
+                noProductsMessage.textContent = 'Erro ao carregar produtos. Tente novamente mais tarde.';
+                noProductsMessage.classList.remove('hidden');
+                productListDiv.appendChild(noProductsMessage); // Garante que a mensagem de erro esteja visível
+                return;
+            }
+
+            if (products.length === 0) {
+                noProductsMessage.textContent = 'Nenhum produto nesta categoria ainda ou correspondente à busca.';
                 noProductsMessage.classList.remove('hidden');
                 productListDiv.appendChild(noProductsMessage);
                 return;
@@ -223,11 +235,16 @@
                 noProductsMessage.classList.add('hidden');
             }
 
-            filteredProducts.forEach(product => {
+            products.forEach(product => {
+                // Certifique-se de que imageUrl é uma URL válida ou use um placeholder
+                const imageUrl = product.imageUrl && (product.imageUrl.startsWith('http://') || product.imageUrl.startsWith('https://')) 
+                                ? product.imageUrl 
+                                : 'https://placehold.co/400x300/E5E7EB/6B7280?text=Sem+Imagem';
+                
                 const productCardHtml = `
                     <div class="bg-card rounded-lg shadow-md overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl">
                         <a href="#" class="product-image-link" data-product-id="${product.id}">
-                            <img src="${product.imageUrl || 'https://placehold.co/400x300/E5E7EB/6B7280?text=Sem+Imagem'}" 
+                            <img src="${imageUrl}" 
                                  alt="${product.name}" class="w-full h-48 object-cover cursor-pointer">
                         </a>
                         <div class="p-6">
@@ -236,46 +253,62 @@
                             <p class="text-xs text-gray-500 mb-2">Categoria: ${product.category || 'N/A'}</p>
                             <div class="flex justify-between items-center">
                                 <span class="text-2xl font-bold text-primary">R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</span>
-                                <a href="${product.supplierLink}" target="_blank" rel="noopener noreferrer"
-                                   class="bg-primary text-white px-5 py-2 rounded-full hover:bg-indigo-600 transition-colors duration-300">Comprar Agora</a>
+                                <a href="produto-detalhe.html?id=${product.id}"
+                                   class="bg-primary text-white px-5 py-2 rounded-full hover:bg-indigo-600 transition-colors duration-300">Ver Detalhes</a>
                             </div>
                         </div>
                     </div>
                 `;
+                // O link "Comprar Agora" foi mudado para "Ver Detalhes" e aponta para produto-detalhe.html
+                // O link direto para o fornecedor deve ficar na página de detalhes.
                 productListDiv.insertAdjacentHTML('beforeend', productCardHtml);
             });
 
-            // Adiciona event listeners para as imagens dos produtos
+            // Adiciona event listeners para as imagens dos produtos (para abrir o modal)
             document.querySelectorAll('.product-image-link img').forEach(img => {
-                img.addEventListener('click', (e) => {
-                    e.preventDefault(); // Impede o redirecionamento do link
+                img.addEventListener('click', async (e) => { // Tornar async para buscar no Supabase
+                    e.preventDefault(); 
                     const productId = e.target.closest('.product-image-link').dataset.productId;
-                    openImageModal(productId);
+                    
+                    // Buscar o produto novamente para garantir que temos todas as imagens adicionais
+                    const { data: product, error } = await supabase
+                        .from('produtos')
+                        .select('imageUrl, additionalImages')
+                        .eq('id', productId)
+                        .single();
+
+                    if (error) {
+                        console.error('Erro ao buscar produto para modal na categoria Casa:', error);
+                        // Opcional: mostrar feedback ao usuário
+                        return;
+                    }
+
+                    if (product) {
+                        openImageModal(product.imageUrl, product.additionalImages || []);
+                    }
                 });
             });
         }
 
         // Função para abrir o modal de imagem
-        function openImageModal(productId) {
-            const products = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
-            const product = products.find(p => p.id === productId);
+        // Agora recebe a URL da imagem principal e um array de imagens adicionais
+        function openImageModal(mainImageUrl, additionalImages) {
+            // Combina a imagem principal e as imagens adicionais, filtrando URLs vazias
+            currentImages = [mainImageUrl, ...additionalImages].filter(url => url && (url.startsWith('http://') || url.startsWith('https://')));
+            currentImageIndex = 0; // Começa sempre com a primeira imagem
 
-            if (product) {
-                currentImages = [product.imageUrl, ...(product.additionalImages || [])].filter(url => url);
-                currentImageIndex = 0; // Sempre começa com a primeira imagem
-
-                if (currentImages.length > 0) {
-                    modalImage.src = currentImages[currentImageIndex];
-                    imageModal.classList.add('show');
-                    updateModalNavigation();
-                } else {
-                    console.warn("Nenhuma imagem encontrada para este produto.");
-                }
+            if (currentImages.length > 0) {
+                modalImage.src = currentImages[currentImageIndex];
+                imageModal.classList.add('show');
+                updateModalNavigation();
+            } else {
+                console.warn("Nenhuma imagem válida encontrada para este produto.");
             }
         }
 
         // Função para atualizar a navegação do modal (setas)
         function updateModalNavigation() {
+            // Exibe as setas apenas se houver mais de uma imagem
             prevImageBtn.style.display = currentImages.length > 1 && currentImageIndex > 0 ? 'block' : 'none';
             nextImageBtn.style.display = currentImages.length > 1 && currentImageIndex < currentImages.length - 1 ? 'block' : 'none';
         }
