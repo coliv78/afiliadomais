@@ -191,6 +191,7 @@
 
         // Evento de carregamento do DOM para inicializar Supabase e carregar produtos
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOMContentLoaded disparado. Iniciando script principal.');
             // Adicione a messageDiv ao DOM assim que o DOM estiver carregado
             document.querySelector('main').prepend(messageDiv);
 
@@ -229,12 +230,12 @@
             const selectImageBtn = document.getElementById('select-image-btn'); // Novo botão
 
             // Adicionar logs para verificar se os elementos são encontrados
-            console.log('Elementos HTML referenciados:');
+            console.log('Verificando elementos HTML:');
             console.log('imageDropZone:', imageDropZone);
             console.log('fileInput:', fileInput);
             console.log('imagePreview:', imagePreview);
             console.log('selectImageBtn:', selectImageBtn);
-
+            console.log('productImageUrlInput:', productImageUrlInput); // Adicionado para depuração
 
             // Referência para o campo de busca
             const searchInput = document.getElementById('search-input');
@@ -299,22 +300,23 @@
             }
 
             // --- Lógica de Drag and Drop ---
-            if (imageDropZone) { // Verifica se o elemento existe antes de adicionar listeners
+            // Adiciona listeners apenas se os elementos forem encontrados
+            if (imageDropZone && fileInput && selectImageBtn) {
                 imageDropZone.addEventListener('dragover', (e) => {
                     e.preventDefault(); // Previne o comportamento padrão (abrir arquivo no navegador)
                     imageDropZone.classList.add('border-primary'); // Feedback visual
-                    console.log('Evento: dragover');
+                    console.log('Evento: dragover disparado.');
                 });
 
                 imageDropZone.addEventListener('dragleave', (e) => {
                     imageDropZone.classList.remove('border-primary'); // Remove feedback visual
-                    console.log('Evento: dragleave');
+                    console.log('Evento: dragleave disparado.');
                 });
 
                 imageDropZone.addEventListener('drop', async (e) => {
                     e.preventDefault();
                     imageDropZone.classList.remove('border-primary');
-                    console.log('Evento: drop');
+                    console.log('Evento: drop disparado.');
 
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
@@ -351,26 +353,18 @@
                         console.log('Nenhum arquivo solto.');
                     }
                 });
-            } else {
-                console.error('Elemento imageDropZone não encontrado!');
-            }
 
-            // Lidar com o clique no novo botão "Selecionar Imagem"
-            if (selectImageBtn) {
+                // Lidar com o clique no novo botão "Selecionar Imagem"
                 selectImageBtn.addEventListener('click', () => {
                     console.log('Evento: click no botão "Selecionar Imagem", ativando input de arquivo.');
                     fileInput.click(); // Ativa o input de arquivo oculto
                 });
-            } else {
-                console.error('Elemento selectImageBtn não encontrado!');
-            }
-            
-            if (fileInput) {
+                
                 fileInput.addEventListener('change', async (e) => {
-                    console.log('Evento: change no input de arquivo.');
+                    console.log('Evento: change no input de arquivo disparado.');
                     const files = e.target.files;
                     if (files.length > 0) {
-                        console.log('Arquivos selecionados:', files);
+                        console.log('Arquivos selecionados via input:', files);
                         let mainImageUploaded = false;
                         let additionalImageUrls = [];
 
@@ -400,11 +394,11 @@
                             productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
                         }
                     } else {
-                        console.log('Nenhum arquivo selecionado.');
+                        console.log('Nenhum arquivo selecionado via input.');
                     }
                 });
             } else {
-                console.error('Elemento fileInput não encontrado!');
+                console.error('Um ou mais elementos de upload de imagem não foram encontrados. Verifique os IDs HTML.');
             }
 
 
