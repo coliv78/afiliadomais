@@ -161,7 +161,7 @@
     <script>
         // --- Configuração do Supabase ---
         const SUPABASE_URL = 'https://euipmrgkumsrdumglfmx.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ1OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiWu9fM';         
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ0OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiWu9fM';         
         const SUPABASE_STORAGE_BUCKET = 'product-images'; // Nome do seu bucket no Supabase Storage
 
         let supabase; // Declara a variável supabase aqui
@@ -176,11 +176,16 @@
         let allProducts = [];
 
         // Função para esperar que o Supabase SDK esteja carregado
-        function waitForSupabase() {
+        function waitForSupabase(timeout = 10000) { // Adiciona um timeout de 10 segundos
             return new Promise((resolve, reject) => {
+                const startTime = Date.now();
                 const checkSupabase = () => {
                     if (typeof Supabase !== 'undefined' && Supabase.createClient) {
+                        console.log('waitForSupabase: Supabase SDK detectado.');
                         resolve();
+                    } else if (Date.now() - startTime > timeout) {
+                        console.error('waitForSupabase: Tempo limite excedido. Supabase SDK não carregou.');
+                        reject(new Error('Supabase SDK não carregou dentro do tempo limite.'));
                     } else {
                         setTimeout(checkSupabase, 50); // Tenta novamente em 50ms
                     }
@@ -239,8 +244,8 @@
             console.log('imagePreview:', imagePreview);
             console.log('selectImageBtn:', selectImageBtn);
             console.log('productImageUrlInput:', productImageUrlInput); 
-            console.log('productForm:', productForm); // Adicionado
-            console.log('productListDiv:', productListDiv); // Adicionado
+            console.log('productForm:', productForm); 
+            console.log('productListDiv:', productListDiv); 
 
 
             // Referência para o campo de busca
@@ -660,3 +665,4 @@
     </script>
 </body>
 </html>
+
