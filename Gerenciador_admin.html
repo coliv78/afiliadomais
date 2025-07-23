@@ -197,16 +197,19 @@
 
             // Espera pelo Supabase SDK antes de inicializar o cliente
             try {
+                console.log('Tentando esperar pelo Supabase SDK...');
                 await waitForSupabase();
+                console.log('Supabase SDK carregado. Tentando criar cliente...');
                 supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 console.log('Supabase client inicializado com sucesso!');
             } catch (error) {
-                console.error("Erro crítico: Não foi possível carregar o SDK do Supabase.", error);
+                console.error("Erro crítico na inicialização do Supabase:", error);
                 showMessage("Erro crítico: O sistema não pôde ser carregado. Verifique sua conexão com a internet ou entre em contato com o suporte.", 'error');
                 return; // Impede a execução do restante do script se o Supabase não carregar
             }
 
             // --- Referências aos Elementos HTML de Gerenciamento de Produtos ---
+            console.log('Obtendo referências aos elementos HTML...');
             const productForm = document.getElementById('product-form');
             const productIdInput = document.getElementById('product-id');
             const productNameInput = document.getElementById('product-name');
@@ -230,12 +233,15 @@
             const selectImageBtn = document.getElementById('select-image-btn'); // Novo botão
 
             // Adicionar logs para verificar se os elementos são encontrados
-            console.log('Verificando elementos HTML:');
+            console.log('Verificação de elementos HTML:');
             console.log('imageDropZone:', imageDropZone);
             console.log('fileInput:', fileInput);
             console.log('imagePreview:', imagePreview);
             console.log('selectImageBtn:', selectImageBtn);
-            console.log('productImageUrlInput:', productImageUrlInput); // Adicionado para depuração
+            console.log('productImageUrlInput:', productImageUrlInput); 
+            console.log('productForm:', productForm); // Adicionado
+            console.log('productListDiv:', productListDiv); // Adicionado
+
 
             // Referência para o campo de busca
             const searchInput = document.getElementById('search-input');
@@ -302,6 +308,7 @@
             // --- Lógica de Drag and Drop ---
             // Adiciona listeners apenas se os elementos forem encontrados
             if (imageDropZone && fileInput && selectImageBtn) {
+                console.log('Adicionando listeners para Drag and Drop e seleção de arquivo.');
                 imageDropZone.addEventListener('dragover', (e) => {
                     e.preventDefault(); // Previne o comportamento padrão (abrir arquivo no navegador)
                     imageDropZone.classList.add('border-primary'); // Feedback visual
@@ -398,7 +405,7 @@
                     }
                 });
             } else {
-                console.error('Um ou mais elementos de upload de imagem não foram encontrados. Verifique os IDs HTML.');
+                console.error('Um ou mais elementos de upload de imagem não foram encontrados. Verifique os IDs HTML. imageDropZone, fileInput ou selectImageBtn são null.');
             }
 
 
