@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Produtos - Minha Loja Afiliada</title>
-    
+    <title>Gerenciador - Minha Loja Afiliada</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script>
         tailwind.config = {
             theme: {
@@ -27,82 +25,114 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        /* Estilos específicos para a área de drag-and-drop */
-        .drop-area {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .drop-area.highlight {
-            background-color: #e0e7ff; /* Cor de destaque ao arrastar */
-            border-color: #4F46E5;
-        }
-        .product-image-preview {
-            max-width: 150px;
-            max-height: 150px;
-            object-fit: contain;
-            margin: 10px auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
     </style>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="font-sans bg-background text-gray-800 antialiased">
 
+    <!-- Cabeçalho (se você quiser manter o mesmo do seu site) -->
     <header class="bg-primary text-white shadow-lg py-4">
         <div class="container mx-auto px-4 flex justify-between items-center">
-            <h1 class="text-3xl font-bold rounded-lg p-2">Minha Loja - Admin Online</h1>
+            <h1 class="text-3xl font-bold rounded-lg p-2">Minha Loja - Gerenciador</h1>
             <nav>
                 <ul class="flex space-x-6">
-                    <li><a href="index.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Início do Site</a></li>
-                    <li><a href="admin-produtos.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Gerenciador de Produtos</a></li>
+                    <li><a href="index.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Início</a></li>
+                    <!-- Adicione outros links de navegação se necessário -->
                 </ul>
             </nav>
         </div>
     </header>
 
-    <section class="admin-section bg-card py-10 px-4 shadow-md rounded-lg mx-auto mt-8 max-w-5xl">
-        <div class="container mx-auto">
-            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Gerenciar Produtos (Supabase)</h2>
+    <!-- Seção Principal do Gerenciador -->
+    <main class="container mx-auto px-4 py-10">
+        <section id="auth-section" class="bg-card shadow-lg rounded-lg p-8 max-w-md mx-auto">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center" id="auth-title">Acessar Gerenciador</h2>
 
-            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
-                <p class="font-bold">Atenção: Dados na Nuvem (Supabase)!</p>
-                <p class="text-sm">As alterações feitas aqui serão salvas no seu banco de dados Supabase e **serão refletidas no seu site público** (se o seu site estiver configurado para ler do Supabase).</p>
-                <p class="text-sm mt-2">As imagens são enviadas para o Supabase Storage e suas URLs são salvas junto com os dados do produto no Supabase Database.</p>
+            <!-- Formulário de Login -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium text-gray-700">Email:</label>
+                    <input type="email" id="login-email" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700">Senha:</label>
+                    <input type="password" id="login-password" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
+                </div>
+                <div>
+                    <label for="login-admin-id" class="block text-sm font-medium text-gray-700">ID de Administrador (Opcional):</label>
+                    <input type="text" id="login-admin-id" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="Gerado automaticamente no cadastro" />
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold">Entrar</button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    Ainda não tem conta? <a href="#" id="show-register" class="text-primary hover:underline font-medium">Cadastre-se aqui</a>
+                </p>
+                <p class="text-sm text-gray-600 mt-2">
+                    Esqueceu seu login? <a href="#" id="show-recover" class="text-primary hover:underline font-medium">Recuperar acesso</a>
+                </p>
             </div>
 
-            <div id="feedbackMessage" class="mt-4 p-3 rounded-md text-sm hidden"></div>
+            <!-- Formulário de Cadastro (Inicialmente oculto) -->
+            <form id="register-form" class="space-y-4 hidden">
+                <div>
+                    <label for="register-email" class="block text-sm font-medium text-gray-700">Email:</label>
+                    <input type="email" id="register-email" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
+                </div>
+                <div>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700">Senha:</label>
+                    <input type="password" id="register-password" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary"
+                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$"
+                        title="A senha deve ter entre 8 e 16 caracteres, incluindo pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial."
+                        required />
+                    <p class="text-xs text-gray-500 mt-1">8-16 caracteres, min. 1 maiúscula, 1 minúscula, 1 número, 1 especial.</p>
+                </div>
+                <div id="generated-admin-id-display" class="hidden bg-gray-100 p-3 rounded-md border border-border">
+                    <label class="block text-sm font-medium text-gray-700">Seu ID de Administrador Gerado:</label>
+                    <p id="admin-id-value" class="mt-1 font-mono text-gray-900 break-words text-sm"></p>
+                    <p class="text-xs text-red-500 mt-1">Anote este ID! Ele será crucial para recuperação de acesso.</p>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold">Cadastrar</button>
+            </form>
 
+            <!-- Formulário de Recuperação de Senha (Inicialmente oculto) -->
+            <form id="recover-form" class="space-y-4 hidden">
+                <div>
+                    <label for="recover-email-or-id" class="block text-sm font-medium text-gray-700">Email ou ID de Administrador:</label>
+                    <input type="text" id="recover-email-or-id" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold">Recuperar Senha</button>
+            </form>
+
+            <div id="message" class="mt-4 p-3 text-sm rounded-md" style="display: none;"></div>
+        </section>
+
+        <!-- Conteúdo do Gerenciador (visível após o login) -->
+        <section id="manager-content" class="bg-card shadow-lg rounded-lg p-8 mt-8 hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Bem-vindo ao Gerenciador!</h2>
+            <p class="text-gray-700 mb-8">Utilize os formulários abaixo para gerenciar os produtos da sua loja.</p>
+
+            <!-- Formulário de Adição/Edição de Produtos -->
             <div class="mb-10 p-6 border border-border rounded-lg shadow-sm">
-                <h3 class="text-2xl font-semibold text-primary mb-6 text-center" id="formTitle">Adicionar Novo Produto</h3>
-                <form id="productForm" class="space-y-4">
-                    <input type="hidden" id="productId" name="productId" value="">
-                    
-                    <div>
-                        <label for="productName" class="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
-                        <input type="text" id="productName" name="productName" required
-                               class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    </div>
-                    <div>
-                        <label for="productDescription" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                        <textarea id="productDescription" name="productDescription" rows="3" required
-                                  class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
-                    </div>
-                    <div>
-                        <label for="productPrice" class="block text-sm font-medium text-gray-700 mb-1">Preço (R$)</label>
-                        <input type="number" id="productPrice" name="productPrice" step="0.01" required
-                               class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-4" id="product-form-title">Adicionar Novo Produto</h3>
+                <form id="product-form" class="space-y-4">
+                    <input type="hidden" id="product-id"> <!-- Campo oculto para ID do produto em edição -->
 
                     <div>
-                        <label for="productCategory" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                        <select id="productCategory" name="productCategory" required
-                                class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <label for="product-name" class="block text-sm font-medium text-gray-700">Nome do Produto:</label>
+                        <input type="text" id="product-name" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
+                    </div>
+                    <div>
+                        <label for="product-description" class="block text-sm font-medium text-gray-700">Descrição:</label>
+                        <textarea id="product-description" rows="3" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required></textarea>
+                    </div>
+                    <div>
+                        <label for="product-price" class="block text-sm font-medium text-gray-700">Preço (R$):</label>
+                        <input type="number" step="0.01" id="product-price" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required />
+                    </div>
+                    <div>
+                        <label for="product-category" class="block text-sm font-medium text-gray-700">Categoria:</label>
+                        <select id="product-category" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" required>
                             <option value="">Selecione uma categoria</option>
                             <option value="eletronicos">Eletrônicos</option>
                             <option value="moda">Moda</option>
@@ -113,577 +143,502 @@
                             <option value="outros">Outros</option>
                         </select>
                     </div>
-
                     <div>
-                        <label for="supplierLink" class="block text-sm font-medium text-gray-700 mb-1">Link do Fornecedor (URL de Compra)</label>
-                        <input type="url" id="supplierLink" name="supplierLink" 
-                               class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                               placeholder="https://link.do.fornecedor.com/produto" required>
-                        <p class="text-xs text-gray-500 mt-1">Este link será usado no botão 'Comprar Agora' na página de detalhes do produto.</p>
+                        <label for="product-supplier-link" class="block text-sm font-medium text-gray-700">Link do Fornecedor (Afiliado):</label>
+                        <input type="url" id="product-supplier-link" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://loja.com/produto-afiliado" required />
                     </div>
-
-                    <div class="mt-6">
-                        <label for="mainImageUrlInput" class="block text-sm font-medium text-gray-700 mb-2">URL da Imagem Principal do Produto</label>
-                        <div class="flex items-center space-x-2">
-                            <input type="url" id="mainImageUrlInput" name="mainImageUrlInput" readonly 
-                                   class="flex-grow p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-100 cursor-not-allowed"
-                                   placeholder="A URL do Supabase aparecerá aqui após o upload automático." title="Este campo é preenchido automaticamente após o upload de uma imagem."
-                                   required>
-                            <button type="button" id="downloadMainImageBtn"
-                                    class="bg-blue-500 text-white px-4 py-3 rounded-md font-semibold hover:bg-blue-600 transition-colors duration-300 shadow-md hidden">
-                                Baixar Imagem
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Ao fazer o upload de uma imagem abaixo, a URL pública do Supabase será automaticamente preenchida aqui.</p>
+                    <div>
+                        <label for="product-image-url" class="block text-sm font-medium text-gray-700">URL da Imagem Principal:</label>
+                        <input type="url" id="product-image-url" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://seusite.com/imagem.jpg" required />
                     </div>
-
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Selecione ou Arraste e Solte Imagem para Upload (Supabase)</label>
-                        <div id="dropArea" class="drop-area bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-                            <p class="text-gray-600">Arraste e solte um arquivo de imagem aqui ou clique para selecionar</p>
-                            <input type="file" id="fileInput" accept="image/*" class="hidden">
-                            <img id="imagePreview" src="" alt="Pré-visualização da Imagem Principal" class="product-image-preview hidden">
-                            <p id="uploadProgress" class="text-sm text-gray-500 mt-2 hidden">Progresso: 0%</p>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">A imagem enviada será hospedada no seu Supabase Storage e sua URL será usada no campo acima.</p>
+                    <div>
+                        <label for="product-additional-images" class="block text-sm font-medium text-gray-700">URLs de Imagens Adicionais (separadas por vírgula):</label>
+                        <textarea id="product-additional-images" rows="2" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Insira URLs completas, separadas por vírgula.</p>
                     </div>
-
-                    <div class="mt-6">
-                        <label for="additionalImages" class="block text-sm font-medium text-gray-700 mb-1">URLs de Imagens Adicionais (separadas por vírgula)</label>
-                        <textarea id="additionalImages" name="additionalImages" rows="4"
-                                  class="w-full p-3 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                  placeholder="Cole as URLs de imagens adicionais aqui, separadas por vírgula. Estas podem vir do Supabase ou de outros sites."></textarea>
-                        <p class="text-xs text-gray-500 mt-1">Para imagens adicionais, você pode inserir URLs de imagens que já estão no Supabase (copie a URL pública lá) ou de qualquer outro lugar na web.</p>
-                    </div>
-
-                    <button type="submit" id="saveProductBtn"
-                            class="w-full bg-primary text-white py-3 rounded-md font-semibold hover:bg-indigo-600 transition-colors duration-300 shadow-md">
-                        Salvar Produto
-                    </button>
-                    <button type="button" id="cancelEditBtn"
-                            class="w-full bg-gray-300 text-gray-800 py-3 rounded-md font-semibold hover:bg-gray-400 transition-colors duration-300 shadow-md mt-2 hidden">
-                        Cancelar Edição
-                    </button>
+                    <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 font-semibold" id="submit-product-btn">Salvar Produto</button>
+                    <button type="button" class="w-full bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors duration-300 font-semibold mt-2" id="cancel-edit-btn" style="display: none;">Cancelar Edição</button>
                 </form>
             </div>
 
-            <section class="search-section bg-card py-6 px-4 shadow-md rounded-lg mx-auto mt-8 max-w-4xl">
-                <div class="container mx-auto text-center flex items-center justify-center space-x-4">
-                    <input
-                        type="text"
-                        id="productSearchInput"
-                        placeholder="Buscar produtos cadastrados..."
-                        class="w-full max-w-xl p-4 text-lg border border-border rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
-                    />
-                    <button id="searchProductBtn"
-                            class="bg-primary text-white px-6 py-4 rounded-full font-semibold hover:bg-indigo-600 transition-colors duration-300 shadow-md">
-                        Buscar
-                    </button>
-                </div>
-            </section>
-
-            <div class="mt-10 p-6 border border-border rounded-lg shadow-sm">
-                <h3 class="text-2xl font-semibold text-primary mb-6 text-center">Produtos Existentes</h3>
-                <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <p id="noProductsMessage" class="text-center text-gray-500 col-span-full">Nenhum produto cadastrado ainda.</p>
+            <!-- Lista de Produtos Existentes -->
+            <div class="p-6 border border-border rounded-lg shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Produtos Cadastrados</h3>
+                <div id="product-list" class="space-y-4">
+                    <p id="no-products-message" class="text-center text-gray-500">Nenhum produto cadastrado ainda.</p>
+                    <!-- Produtos serão carregados aqui -->
                 </div>
             </div>
-        </div>
-    </section>
 
+            <button id="logout-button" class="mt-6 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors duration-300 font-semibold">Sair</button>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
     <footer class="bg-gray-800 text-white py-6 mt-12">
         <div class="container mx-auto px-4 text-center">
             <p class="text-sm">&copy; 2025 Minha Loja Afiliada. Todos os direitos reservados.</p>
         </div>
     </footer>
 
-    <div id="deleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full text-center">
-            <h3 class="text-xl font-semibold mb-4">Confirmar Exclusão</h3>
-            <p class="mb-6">Tem certeza que deseja excluir este produto?</p>
-            <div class="flex justify-center space-x-4">
-                <button id="confirmDeleteBtn" class="bg-red-500 text-white px-5 py-2 rounded-md hover:bg-red-600 transition-colors duration-300">
-                    Excluir
-                </button>
-                <button id="cancelDeleteBtn" class="bg-gray-300 text-gray-800 px-5 py-2 rounded-md hover:bg-gray-400 transition-colors duration-300">
-                    Cancelar
-                </button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Script JavaScript para o Supabase e Lógica de Autenticação e Gerenciamento -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // **IMPORTANTE**: Substitua pelos seus dados reais do Supabase!
+        // --- Configuração do Supabase ---
         const SUPABASE_URL = 'https://euipmrgkumsrdumglfmx.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ1OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiWu9fM';         
-        const SUPABASE_BUCKET_NAME = 'site-images'; // Use o nome do bucket que você criou (ex: 'site-images')
 
+        // Inicialize o cliente Supabase imediatamente após o carregamento do SDK
         const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Referências a elementos do DOM
-        const feedbackMessageDiv = document.getElementById('feedbackMessage');
-        const productForm = document.getElementById('productForm');
-        const productIdInput = document.getElementById('productId'); // Usado para armazenar o ID do produto em edição
-        const productNameInput = document.getElementById('productName');
-        const productDescriptionInput = document.getElementById('productDescription');
-        const productPriceInput = document.getElementById('productPrice');
-        const productCategoryInput = document.getElementById('productCategory');
-        const supplierLinkInput = document.getElementById('supplierLink');
-        
-        const mainImageUrlInput = document.getElementById('mainImageUrlInput'); 
-        const downloadMainImageBtn = document.getElementById('downloadMainImageBtn'); 
-        const additionalImagesInput = document.getElementById('additionalImages');
-        const dropArea = document.getElementById('dropArea');
-        const fileInput = document.getElementById('fileInput'); // Este é o input type="file" escondido
-        const imagePreview = document.getElementById('imagePreview');
-        const uploadProgress = document.getElementById('uploadProgress');
-        const productListDiv = document.getElementById('productList');
-        const noProductsMessage = document.getElementById('noProductsMessage');
-        const formTitle = document.getElementById('formTitle');
-        const saveProductBtn = document.getElementById('saveProductBtn');
-        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        // --- Referências aos Elementos HTML de Autenticação ---
+        const authTitle = document.getElementById('auth-title');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const recoverForm = document.getElementById('recover-form');
+        const showRegisterBtn = document.getElementById('show-register');
+        const showRecoverBtn = document.getElementById('show-recover');
+        const authSection = document.getElementById('auth-section');
+        const managerContent = document.getElementById('manager-content');
+        const logoutButton = document.getElementById('logout-button');
+        const messageDiv = document.getElementById('message');
 
-        const productSearchInput = document.getElementById('productSearchInput');
-        const searchProductBtn = document.getElementById('searchProductBtn');
+        const loginEmailInput = document.getElementById('login-email');
+        const loginPasswordInput = document.getElementById('login-password');
+        const loginAdminIdInput = document.getElementById('login-admin-id');
 
-        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
-        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const registerEmailInput = document.getElementById('register-email');
+        const registerPasswordInput = document.getElementById('register-password');
+        const generatedAdminIdDisplay = document.getElementById('generated-admin-id-display');
+        const adminIdValue = document.getElementById('admin-id-value');
 
-        let currentEditingProductId = null; // Armazena o ID do produto que está sendo editado ou excluído
+        const recoverEmailOrIdInput = document.getElementById('recover-email-or-id');
 
-        // Função para exibir mensagens de feedback
-        function showFeedback(message, type = 'success') {
-            feedbackMessageDiv.textContent = message;
-            feedbackMessageDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+        // --- Referências aos Elementos HTML de Gerenciamento de Produtos ---
+        const productForm = document.getElementById('product-form');
+        const productIdInput = document.getElementById('product-id');
+        const productNameInput = document.getElementById('product-name');
+        const productDescriptionInput = document.getElementById('product-description');
+        const productPriceInput = document.getElementById('product-price');
+        const productCategorySelect = document.getElementById('product-category');
+        const productSupplierLinkInput = document.getElementById('product-supplier-link');
+        const productImageUrlInput = document.getElementById('product-image-url');
+        const productAdditionalImagesInput = document.getElementById('product-additional-images');
+        const submitProductBtn = document.getElementById('submit-product-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const productFormTitle = document.getElementById('product-form-title');
+        const productListDiv = document.getElementById('product-list');
+        const noProductsMessage = document.getElementById('no-products-message');
+
+
+        // --- Regex para Validação de Senha ---
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
+
+        // --- Funções Auxiliares ---
+        function showMessage(msg, type = 'info') {
+            messageDiv.textContent = msg;
+            messageDiv.style.display = 'block';
+            messageDiv.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800');
             if (type === 'success') {
-                feedbackMessageDiv.classList.add('bg-green-100', 'text-green-700');
+                messageDiv.classList.add('bg-green-100', 'text-green-800');
             } else if (type === 'error') {
-                feedbackMessageDiv.classList.add('bg-red-100', 'text-red-700');
+                messageDiv.classList.add('bg-red-100', 'text-red-800');
             } else { // info
-                feedbackMessageDiv.classList.add('bg-blue-100', 'text-blue-700');
+                messageDiv.classList.add('bg-blue-100', 'text-blue-800');
             }
-            setTimeout(() => {
-                feedbackMessageDiv.classList.add('hidden');
-            }, 5000);
         }
 
-        // --- Gerenciamento de Imagens (UPLOAD PARA SUPABASE Storage) ---
+        function hideForms() {
+            loginForm.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            recoverForm.classList.add('hidden');
+            messageDiv.style.display = 'none';
+        }
 
-        dropArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropArea.classList.add('highlight');
-        });
-
-        dropArea.addEventListener('dragleave', () => {
-            dropArea.classList.remove('highlight');
-        });
-
-        dropArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropArea.classList.remove('highlight');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                uploadImageToSupabase(files[0]);
+        function generateAdminId(length = 16) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_+=';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-        });
+            return result;
+        }
 
-        dropArea.addEventListener('click', () => {
-            fileInput.click();
-        });
+        // --- Lógica de Autenticação ---
 
-        fileInput.addEventListener('change', (e) => {
-            const files = e.target.files;
-            if (files.length > 0) {
-                uploadImageToSupabase(files[0]);
+        // Função para verificar o estado da sessão
+        async function checkSession() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (session) {
+                // Usuário logado, verificar se é um administrador
+                const { data: adminData, error: adminError } = await supabase
+                    .from('administradores') // Nome da sua nova tabela de administradores
+                    .select('admin_id')
+                    .eq('user_id', session.user.id)
+                    .single();
+
+                if (adminError || !adminData) {
+                    // Não é um administrador ou erro ao buscar, desloga
+                    console.error('Usuário logado não é um administrador ou erro ao buscar admin_id:', adminError);
+                    await supabase.auth.signOut();
+                    showMessage('Acesso negado. Você não é um administrador.', 'error');
+                    return;
+                }
+
+                // Usuário logado E é um administrador
+                hideForms();
+                authSection.classList.add('hidden'); // Esconde a seção de login/cadastro
+                managerContent.classList.remove('hidden');
+                loadProducts(); // Carrega os produtos quando o admin faz login
+            } else {
+                // Nenhum usuário logado
+                authSection.classList.remove('hidden'); // Mostra a seção de login/cadastro
+                managerContent.classList.add('hidden');
+                hideForms();
+                loginForm.classList.remove('hidden'); // Mostra o formulário de login por padrão
+                authTitle.textContent = 'Acessar Gerenciador';
             }
-        });
+        }
 
-        async function uploadImageToSupabase(file) {
-            if (!file.type.startsWith('image/')) {
-                showFeedback("Por favor, selecione um arquivo de imagem.", 'error');
-                return;
-            }
+        // Evento de carregamento do DOM para inicializar Supabase e verificar a sessão
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession(); // Verifica a sessão após a inicialização do Supabase
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
-                imagePreview.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
+            // Evento para monitorar mudanças na sessão (login, logout, etc.)
+            supabase.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+                    checkSession();
+                }
+            });
 
-            uploadProgress.classList.remove('hidden');
-            uploadProgress.textContent = 'Iniciando upload...';
-            downloadMainImageBtn.classList.add('hidden');
+            // Login de Administrador
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = loginEmailInput.value;
+                const password = loginPasswordInput.value;
+                const adminId = loginAdminIdInput.value.trim();
 
-            const filePath = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
-
-            try {
-                const { data, error } = await supabase.storage
-                    .from(SUPABASE_BUCKET_NAME)
-                    .upload(filePath, file, {
-                        cacheControl: '3600',
-                        upsert: false
-                    });
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
 
                 if (error) {
-                    throw error;
+                    showMessage(`Erro no login: ${error.message}`, 'error');
+                } else if (data.user) {
+                    const { data: adminData, error: adminError } = await supabase
+                        .from('administradores')
+                        .select('admin_id')
+                        .eq('user_id', data.user.id)
+                        .single();
+
+                    if (adminError || !adminData) {
+                        showMessage('Credenciais de administrador inválidas ou ID de administrador incorreto.', 'error');
+                        await supabase.auth.signOut();
+                        return;
+                    }
+
+                    if (adminId && adminData.admin_id !== adminId) {
+                        showMessage('ID de Administrador incorreto.', 'error');
+                        await supabase.auth.signOut();
+                        return;
+                    }
+
+                    showMessage('Login bem-sucedido!', 'success');
+                }
+            });
+
+            // Cadastro de Administrador
+            showRegisterBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                hideForms();
+                registerForm.classList.remove('hidden');
+                authTitle.textContent = 'Cadastrar Administrador';
+                generatedAdminIdDisplay.classList.add('hidden');
+                adminIdValue.textContent = '';
+            });
+
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = registerEmailInput.value;
+                const password = registerPasswordInput.value;
+
+                if (!passwordRegex.test(password)) {
+                    showMessage('A senha não atende aos requisitos de segurança. Verifique o padrão.', 'error');
+                    return;
                 }
 
-                const publicUrlResponse = supabase.storage.from(SUPABASE_BUCKET_NAME).getPublicUrl(filePath);
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                });
 
-                if (publicUrlResponse.error) {
-                    throw publicUrlResponse.error;
+                if (authError) {
+                    showMessage(`Erro no cadastro: ${authError.message}`, 'error');
+                    return;
                 }
 
-                const publicUrl = publicUrlResponse.data.publicUrl;
+                if (authData.user) {
+                    const generatedId = generateAdminId();
+                    const userId = authData.user.id;
 
-                mainImageUrlInput.value = publicUrl;
-                imagePreview.src = publicUrl;
+                    const { error: insertError } = await supabase
+                        .from('administradores')
+                        .insert([{ user_id: userId, admin_id: generatedId, email: email }]);
 
-                uploadProgress.textContent = 'Upload concluído!';
-                uploadProgress.style.color = 'green';
-                showFeedback(`Imagem enviada para o Supabase! URL: ${publicUrl}`, 'success');
-                console.log('Arquivo enviado:', publicUrl);
+                    if (insertError) {
+                        console.error('Erro ao salvar ID do administrador:', insertError);
+                        showMessage(`Cadastro de usuário concluído, mas houve um erro ao salvar o ID de administrador: ${insertError.message}. Por favor, entre em contato com o suporte.`, 'error');
+                        return;
+                    }
 
-                if (publicUrl.startsWith('http://') || publicUrl.startsWith('https://')) {
-                    downloadMainImageBtn.classList.remove('hidden');
+                    adminIdValue.textContent = generatedId;
+                    generatedAdminIdDisplay.classList.remove('hidden');
+                    showMessage('Cadastro bem-sucedido! Um e-mail de confirmação foi enviado para ' + email + '. Por favor, ANOTE SEU ID DE ADMINISTRADOR e verifique sua caixa de entrada para ativar sua conta.', 'success');
+                    registerForm.reset();
+                } else {
+                    showMessage('Cadastro bem-sucedido! Um e-mail de confirmação foi enviado para ' + email + '. Por favor, verifique sua caixa de entrada para ativar sua conta.', 'success');
+                    registerForm.reset();
+                }
+            });
+
+            // Recuperação de Senha
+            showRecoverBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                hideForms();
+                recoverForm.classList.remove('hidden');
+                authTitle.textContent = 'Recuperar Acesso';
+            });
+
+            recoverForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const emailOrId = recoverEmailOrIdInput.value.trim();
+
+                let targetEmail = emailOrId;
+                if (!emailOrId.includes('@')) {
+                    const { data: adminData, error: adminError } = await supabase
+                        .from('administradores')
+                        .select('email')
+                        .eq('admin_id', emailOrId)
+                        .single();
+
+                    if (adminError || !adminData) {
+                        showMessage('ID de Administrador não encontrado ou erro ao buscar e-mail.', 'error');
+                        return;
+                    }
+                    targetEmail = adminData.email;
                 }
 
-            } catch (error) {
-                uploadProgress.textContent = `Erro no upload: ${error.message}`;
-                uploadProgress.style.color = 'red';
-                showFeedback(`Erro ao enviar imagem para o Supabase: ${error.message}`, 'error');
-                console.error('Erro no upload para Supabase:', error);
-                mainImageUrlInput.value = '';
-                imagePreview.classList.add('hidden');
-                imagePreview.src = '';
-            } finally {
-                setTimeout(() => {
-                    uploadProgress.classList.add('hidden');
-                    uploadProgress.textContent = 'Progresso: 0%';
-                    uploadProgress.style.color = 'gray';
-                }, 3000);
-            }
-        }
+                const { error } = await supabase.auth.resetPasswordForEmail(targetEmail, {
+                    redirectTo: window.location.origin + '/nova_senha_admin.html',
+                });
 
-        function downloadImage(imageUrl) {
-            if (!imageUrl) {
-                showFeedback("Nenhuma URL de imagem para baixar.", 'error');
-                return;
-            }
+                if (error) {
+                    showMessage(`Erro na recuperação: ${error.message}`, 'error');
+                } else {
+                    showMessage('Link de recuperação enviado para o seu e-mail (se cadastrado)! Verifique sua caixa de entrada.', 'info');
+                }
+            });
 
-            if (!(imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
-                showFeedback("O download direto é apenas para imagens da web (URL completa).", 'info');
-                return;
-            }
+            // Logout
+            logoutButton.addEventListener('click', async () => {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    showMessage(`Erro ao sair: ${error.message}`, 'error');
+                } else {
+                    showMessage('Sessão encerrada com sucesso.', 'success');
+                }
+            });
 
-            const a = document.createElement('a');
-            a.href = imageUrl;
-            
-            const url = new URL(imageUrl);
-            const pathSegments = url.pathname.split('/');
-            let filename = pathSegments[pathSegments.length - 1];
-            if (!filename || filename.indexOf('.') === -1) { 
-                filename = 'downloaded_image.png'; 
-                if (imageUrl.includes('.jpg')) filename = 'downloaded_image.jpg';
-                else if (imageUrl.includes('.jpeg')) filename = 'downloaded_image.jpeg';
-                else if (imageUrl.includes('.gif')) filename = 'downloaded_image.gif';
-                else if (imageUrl.includes('.webp')) filename = 'downloaded_image.webp';
-            }
-            a.download = filename; 
-            
-            document.body.appendChild(a);
-            a.click(); 
-            document.body.removeChild(a); 
-            showFeedback("Download da imagem iniciado (verifique sua pasta de downloads).", 'info');
-        }
+            // --- Lógica de Gerenciamento de Produtos ---
 
-        downloadMainImageBtn.addEventListener('click', () => {
-            downloadImage(mainImageUrlInput.value);
-        });
+            // Função para carregar e exibir os produtos
+            async function loadProducts() {
+                productListDiv.innerHTML = ''; // Limpa a lista
+                noProductsMessage.style.display = 'none'; // Oculta a mensagem inicialmente
 
-        mainImageUrlInput.addEventListener('input', () => {
-            const imageUrl = mainImageUrlInput.value.trim();
-            if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-                downloadMainImageBtn.classList.remove('hidden');
-                imagePreview.src = imageUrl;
-                imagePreview.classList.remove('hidden');
-            } else {
-                downloadMainImageBtn.classList.add('hidden');
-                imagePreview.classList.add('hidden'); 
-                imagePreview.src = '';
-            }
-        });
+                const { data: products, error } = await supabase
+                    .from('produtos')
+                    .select('*')
+                    .order('name', { ascending: true }); // Ordena por nome
 
-        // --- Gerenciamento de Produtos (AGORA COM SUPABASE DATABASE) ---
+                if (error) {
+                    console.error('Erro ao carregar produtos:', error);
+                    showMessage('Erro ao carregar produtos. Tente novamente.', 'error');
+                    return;
+                }
 
-        // Função para carregar produtos do Supabase (substitui loadProducts do localStorage)
-        async function loadProducts(searchTerm = '') {
-            productListDiv.innerHTML = ''; // Limpa a lista existente
+                if (products.length === 0) {
+                    noProductsMessage.style.display = 'block';
+                    productListDiv.appendChild(noProductsMessage);
+                    return;
+                }
 
-            let query = supabase.from('produtos').select('*');
-
-            if (searchTerm) {
-                // Busca em múltiplos campos (name, description, category)
-                query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`);
-            }
-
-            const { data: products, error } = await query.order('name', { ascending: true }); // Ordena por nome
-
-            if (error) {
-                console.error('Erro ao carregar produtos do Supabase:', error);
-                showFeedback('Erro ao carregar produtos.', 'error');
-                noProductsMessage.classList.remove('hidden');
-                return;
-            }
-
-            if (products.length === 0) {
-                noProductsMessage.classList.remove('hidden');
-            } else {
-                noProductsMessage.classList.add('hidden');
                 products.forEach(product => {
-                    const productCardHtml = `
-                        <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center text-center">
-                            <img src="${product.imageUrl || 'https://placehold.co/100x100/E5E7EB/6B7280?text=Sem+Imagem'}" 
-                                 alt="${product.name}" class="w-24 h-24 object-cover rounded-md mb-4">
-                            <h4 class="text-lg font-semibold mb-1">${product.name}</h4>
-                            <p class="text-sm text-secondary mb-2 line-clamp-2">${product.description}</p>
-                            <p class="text-xs text-gray-500 mb-2">Categoria: ${product.category || 'N/A'}</p>
-                            <p class="text-xl font-bold text-primary mb-4">R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</p>
+                    const productCard = `
+                        <div class="product-item bg-gray-50 p-4 rounded-md shadow-sm flex items-center justify-between">
+                            <div>
+                                <h4 class="text-lg font-semibold">${product.name}</h4>
+                                <p class="text-sm text-gray-600">R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</p>
+                                <p class="text-xs text-gray-500">Categoria: ${product.category}</p>
+                            </div>
                             <div class="flex space-x-2">
-                                <a href="produto-detalhe.html?id=${product.id}" 
-                                   class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors duration-300">
-                                    Ver Detalhes
-                                </a>
-                                <button data-id="${product.id}"
-                                        class="edit-btn bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300">
-                                    Editar
-                                </button>
-                                <button data-id="${product.id}"
-                                        class="delete-btn bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors duration-300">
-                                    Excluir
-                                </button>
+                                <button data-id="${product.id}" class="edit-product-btn bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors">Editar</button>
+                                <button data-id="${product.id}" class="delete-product-btn bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition-colors">Excluir</button>
                             </div>
                         </div>
                     `;
-                    productListDiv.insertAdjacentHTML('beforeend', productCardHtml);
+                    productListDiv.insertAdjacentHTML('beforeend', productCard);
                 });
 
-                // Adiciona event listeners para os botões de Editar e Excluir APÓS os cards serem adicionados
-                document.querySelectorAll('.edit-btn').forEach(button => {
-                    button.addEventListener('click', (e) => editProduct(e.target.dataset.id));
+                // Adiciona listeners para os botões de edição e exclusão
+                document.querySelectorAll('.edit-product-btn').forEach(button => {
+                    button.addEventListener('click', editProduct);
                 });
-                document.querySelectorAll('.delete-btn').forEach(button => {
-                    button.addEventListener('click', (e) => showDeleteConfirmModal(e.target.dataset.id));
+                document.querySelectorAll('.delete-product-btn').forEach(button => {
+                    button.addEventListener('click', deleteProduct);
                 });
             }
-        }
 
-        // Função para preencher o formulário para edição (AGORA DO SUPABASE)
-        async function editProduct(id) {
-            const { data: productToEdit, error } = await supabase
-                .from('produtos')
-                .select('*')
-                .eq('id', id)
-                .single(); // Espera apenas um resultado
+            // Função para preencher o formulário com dados de um produto para edição
+            async function editProduct(event) {
+                const productId = event.target.dataset.id;
+                const { data: product, error } = await supabase
+                    .from('produtos')
+                    .select('*')
+                    .eq('id', productId)
+                    .single();
 
-            if (error) {
-                console.error('Erro ao buscar produto para edição:', error);
-                showFeedback("Erro ao carregar produto para edição.", 'error');
-                return;
+                if (error || !product) {
+                    console.error('Erro ao buscar produto para edição:', error);
+                    showMessage('Erro ao carregar dados do produto para edição.', 'error');
+                    return;
+                }
+
+                // Preenche o formulário
+                productIdInput.value = product.id;
+                productNameInput.value = product.name;
+                productDescriptionInput.value = product.description;
+                productPriceInput.value = parseFloat(product.price).toFixed(2);
+                productCategorySelect.value = product.category;
+                productSupplierLinkInput.value = product.supplierLink;
+                productImageUrlInput.value = product.imageUrl;
+                // Converte o array de imagens adicionais para string separada por vírgula
+                productAdditionalImagesInput.value = product.additionalImages ? product.additionalImages.join(', ') : '';
+
+                productFormTitle.textContent = 'Editar Produto';
+                submitProductBtn.textContent = 'Atualizar Produto';
+                cancelEditBtn.style.display = 'block'; // Mostra o botão de cancelar edição
+                showMessage('Formulário preenchido para edição.', 'info');
             }
 
-            if (productToEdit) {
-                currentEditingProductId = id;
-                formTitle.textContent = "Editar Produto";
-                saveProductBtn.textContent = "Atualizar Produto";
-                cancelEditBtn.classList.remove('hidden');
+            // Função para resetar o formulário de produto para adicionar novo
+            cancelEditBtn.addEventListener('click', () => {
+                productForm.reset();
+                productIdInput.value = ''; // Limpa o ID oculto
+                productFormTitle.textContent = 'Adicionar Novo Produto';
+                submitProductBtn.textContent = 'Salvar Produto';
+                cancelEditBtn.style.display = 'none';
+                showMessage('Formulário pronto para adicionar novo produto.', 'info');
+            });
 
-                productNameInput.value = productToEdit.name;
-                productDescriptionInput.value = productToEdit.description;
-                productPriceInput.value = productToEdit.price;
-                productCategoryInput.value = productToEdit.category || '';
-                supplierLinkInput.value = productToEdit.supplierLink || '';
-                
-                mainImageUrlInput.value = productToEdit.imageUrl || '';
-                additionalImagesInput.value = productToEdit.additionalImages ? productToEdit.additionalImages.join(', ') : '';
+            // Função para excluir um produto
+            async function deleteProduct(event) {
+                const productId = event.target.dataset.id;
+                if (!confirm('Tem certeza que deseja excluir este produto?')) {
+                    return;
+                }
 
-                if (productToEdit.imageUrl) {
-                    imagePreview.src = productToEdit.imageUrl;
-                    imagePreview.classList.remove('hidden');
-                    if (productToEdit.imageUrl.startsWith('http://') || productToEdit.imageUrl.startsWith('https://')) {
-                        downloadMainImageBtn.classList.remove('hidden');
-                    } else {
-                        downloadMainImageBtn.classList.add('hidden');
-                    }
+                const { error } = await supabase
+                    .from('produtos')
+                    .delete()
+                    .eq('id', productId);
+
+                if (error) {
+                    console.error('Erro ao excluir produto:', error);
+                    showMessage(`Erro ao excluir produto: ${error.message}`, 'error');
                 } else {
-                    imagePreview.classList.add('hidden');
-                    imagePreview.src = '';
-                    downloadMainImageBtn.classList.add('hidden');
-                }
-            } else {
-                showFeedback("Produto não encontrado para edição.", 'error');
-            }
-        }
-
-        // Função para mostrar o modal de confirmação de exclusão
-        function showDeleteConfirmModal(id) {
-            currentEditingProductId = id;
-            deleteConfirmModal.classList.remove('hidden');
-        }
-
-        // Função para esconder o modal de confirmação de exclusão
-        function hideDeleteConfirmModal() {
-            deleteConfirmModal.classList.add('hidden');
-            currentEditingProductId = null;
-        }
-
-        // Função principal para deletar um produto (AGORA COM SUPABASE)
-        async function executeDeleteProduct(id) {
-            const { error } = await supabase
-                .from('produtos')
-                .delete()
-                .eq('id', id); // Deleta o produto com o ID correspondente
-
-            if (error) {
-                console.error('Erro ao excluir produto do Supabase:', error);
-                showFeedback(`Erro ao excluir produto: ${error.message}`, 'error');
-                return;
-            }
-            showFeedback("Produto excluído com sucesso do Supabase!");
-            resetForm();
-            loadProducts(); // Recarrega a lista para refletir a exclusão
-        }
-
-        // Event listeners para os botões do modal de confirmação
-        confirmDeleteBtn.addEventListener('click', () => {
-            if (currentEditingProductId) {
-                executeDeleteProduct(currentEditingProductId);
-            }
-            hideDeleteConfirmModal();
-        });
-
-        cancelDeleteBtn.addEventListener('click', hideDeleteConfirmModal);
-
-        // Lida com o envio do formulário (Adicionar ou Editar) - AGORA COM SUPABASE
-        productForm.addEventListener('submit', async (e) => { // Adicionado 'async' aqui
-            e.preventDefault();
-
-            const name = productNameInput.value.trim();
-            const description = productDescriptionInput.value.trim();
-            const price = parseFloat(productPriceInput.value);
-            const category = productCategoryInput.value;
-            const supplierLink = supplierLinkInput.value.trim();
-            
-            const finalImageUrl = mainImageUrlInput.value.trim(); 
-            const additionalImages = additionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
-
-            if (!supplierLink.startsWith('http://') && !supplierLink.startsWith('https://')) {
-                showFeedback("O 'Link do Fornecedor' deve ser uma URL válida (começar com http:// ou https://).", 'error');
-                return;
-            }
-
-            if (!name || !description || isNaN(price) || price <= 0 || !category || !supplierLink || !finalImageUrl) {
-                showFeedback("Por favor, preencha todos os campos obrigatórios corretamente (Nome, Descrição, Preço, Categoria, Link do Fornecedor e Imagem Principal).", 'error');
-                return;
-            }
-
-            const productData = {
-                name: name,
-                description: description,
-                price: price,
-                category: category,
-                supplierLink: supplierLink,
-                imageUrl: finalImageUrl,
-                // O Supabase espera um array para o tipo 'text[]'
-                additionalImages: additionalImages.length > 0 ? additionalImages : null, // Salva null se vazio
-                lastUpdated: new Date().toISOString()
-            };
-
-            let error = null;
-            let data = null;
-
-            if (currentEditingProductId) {
-                // Atualiza um produto existente no Supabase
-                const response = await supabase
-                    .from('produtos')
-                    .update(productData)
-                    .eq('id', currentEditingProductId)
-                    .select(); // Retorna os dados atualizados
-
-                data = response.data;
-                error = response.error;
-
-                if (!error) {
-                    showFeedback("Produto atualizado no Supabase com sucesso!");
-                }
-            } else {
-                // Adiciona um novo produto ao Supabase
-                const response = await supabase
-                    .from('produtos')
-                    .insert([productData])
-                    .select(); // Retorna os dados inseridos
-
-                data = response.data;
-                error = response.error;
-
-                if (!error) {
-                    showFeedback("Produto adicionado ao Supabase com sucesso!");
+                    showMessage('Produto excluído com sucesso!', 'success');
+                    loadProducts(); // Recarrega a lista após a exclusão
                 }
             }
 
-            if (error) {
-                console.error('Erro ao salvar produto no Supabase:', error);
-                showFeedback(`Erro ao salvar produto: ${error.message}`, 'error');
-            } else {
-                console.log('Operação de salvar produto bem-sucedida:', data);
-                resetForm();
-                loadProducts(); // Recarrega a lista para refletir as alterações
-            }
-        });
+            // Lidar com o envio do formulário de produto (Adicionar/Atualizar)
+            productForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-        // Função para resetar o formulário
-        function resetForm() {
-            productForm.reset();
-            productIdInput.value = ''; // Certifica que o ID escondido está limpo
-            mainImageUrlInput.value = ''; 
-            additionalImagesInput.value = '';
-            productCategoryInput.value = '';
-            supplierLinkInput.value = '';
-            currentEditingProductId = null;
-            formTitle.textContent = "Adicionar Novo Produto";
-            saveProductBtn.textContent = "Salvar Produto";
-            cancelEditBtn.classList.add('hidden');
-            imagePreview.classList.add('hidden');
-            imagePreview.src = '';
-            uploadProgress.classList.add('hidden');
-            downloadMainImageBtn.classList.add('hidden');
-        }
+                const id = productIdInput.value; // Será vazio para novo produto, preenchido para edição
+                const name = productNameInput.value.trim();
+                const description = productDescriptionInput.value.trim();
+                const price = parseFloat(productPriceInput.value);
+                const category = productCategorySelect.value;
+                const supplierLink = productSupplierLinkInput.value.trim();
+                const imageUrl = productImageUrlInput.value.trim();
+                // Converte a string de URLs adicionais em um array, filtrando vazios
+                const additionalImages = productAdditionalImagesInput.value.trim()
+                                        .split(',')
+                                        .map(url => url.trim())
+                                        .filter(url => url !== '');
 
-        // Event listener para o botão Cancelar Edição
-        cancelEditBtn.addEventListener('click', resetForm);
+                // Validação básica
+                if (!name || !description || isNaN(price) || price <= 0 || !category || !supplierLink || !imageUrl) {
+                    showMessage('Por favor, preencha todos os campos obrigatórios e verifique o preço.', 'error');
+                    return;
+                }
 
-        // Event listener para o campo de busca de produtos (para filtrar enquanto digita)
-        productSearchInput.addEventListener('input', (e) => {
-            loadProducts(e.target.value); 
-        });
+                let operation;
+                let error;
 
-        // Event listener para o botão de busca
-        searchProductBtn.addEventListener('click', () => {
-            loadProducts(productSearchInput.value);
-        });
+                if (id) {
+                    // Atualizar produto existente
+                    const { error: updateError } = await supabase
+                        .from('produtos')
+                        .update({
+                            name,
+                            description,
+                            price,
+                            category,
+                            supplierLink,
+                            imageUrl,
+                            additionalImages // Supabase aceita JSONB para arrays
+                        })
+                        .eq('id', id);
+                    error = updateError;
+                    operation = 'atualizado';
+                } else {
+                    // Adicionar novo produto
+                    const { error: insertError } = await supabase
+                        .from('produtos')
+                        .insert([
+                            {
+                                name,
+                                description,
+                                price,
+                                category,
+                                supplierLink,
+                                imageUrl,
+                                additionalImages // Supabase aceita JSONB para arrays
+                            }
+                        ]);
+                    error = insertError;
+                    operation = 'adicionado';
+                }
 
-        // Event listener para a tecla "Enter" no campo de busca
-        productSearchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault(); 
-                loadProducts(productSearchInput.value);
-            }
-        });
-
-        // Carrega os produtos ao iniciar a página
-        document.addEventListener('DOMContentLoaded', () => loadProducts());
+                if (error) {
+                    console.error(`Erro ao ${operation} produto:`, error);
+                    showMessage(`Erro ao ${operation} produto: ${error.message}`, 'error');
+                } else {
+                    showMessage(`Produto ${operation} com sucesso!`, 'success');
+                    productForm.reset(); // Limpa o formulário
+                    productIdInput.value = ''; // Limpa o ID oculto
+                    productFormTitle.textContent = 'Adicionar Novo Produto';
+                    submitProductBtn.textContent = 'Salvar Produto';
+                    cancelEditBtn.style.display = 'none';
+                    loadProducts(); // Recarrega a lista de produtos
+                }
+            });
+        }); // Fim do DOMContentLoaded
     </script>
 </body>
 </html>
+
