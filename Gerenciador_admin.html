@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gerenciador - Minha Loja Afiliada</title>
+    <title>Gerenciador de Produtos - Minha Loja Afiliada</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -32,7 +32,7 @@
     <!-- Cabeçalho -->
     <header class="bg-primary text-white shadow-lg py-4">
         <div class="container mx-auto px-4 flex justify-between items-center">
-            <h1 class="text-3xl font-bold rounded-lg p-2">Minha Loja - Gerenciador</h1>
+            <h1 class="text-3xl font-bold rounded-lg p-2">Minha Loja - Gerenciador de Produtos</h1>
             <nav>
                 <ul class="flex space-x-6">
                     <li><a href="index.html" class="hover:text-gray-200 transition-colors duration-300 font-medium">Início</a></li>
@@ -44,7 +44,7 @@
     <!-- Seção Principal do Gerenciador (visível diretamente) -->
     <main class="container mx-auto px-4 py-10">
         <section id="manager-content" class="bg-card shadow-lg rounded-lg p-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Bem-vindo ao Gerenciador!</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Bem-vindo ao Gerenciador de Produtos!</h2>
             <p class="text-gray-700 mb-8">Utilize os formulários abaixo para gerenciar os produtos da sua loja.</p>
 
             <!-- Formulário de Adição/Edição de Produtos -->
@@ -82,10 +82,19 @@
                         <label for="product-supplier-link" class="block text-sm font-medium text-gray-700">Link do Fornecedor (Afiliado):</label>
                         <input type="url" id="product-supplier-link" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://loja.com/produto-afiliado" required />
                     </div>
+                    
+                    <!-- Campo de URL da Imagem Principal e Área de Drag and Drop -->
                     <div>
                         <label for="product-image-url" class="block text-sm font-medium text-gray-700">URL da Imagem Principal:</label>
                         <input type="url" id="product-image-url" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://seusite.com/imagem.jpg" required />
                     </div>
+                    <div id="image-drop-zone" class="mt-4 p-6 border-2 border-dashed border-border rounded-md text-center cursor-pointer hover:border-primary transition-colors duration-300">
+                        <p class="text-gray-600 mb-2">Arraste e solte imagens aqui ou clique para selecionar</p>
+                        <input type="file" id="file-input" class="hidden" accept="image/*" multiple />
+                        <img id="image-preview" src="" alt="Pré-visualização da Imagem" class="max-w-full h-32 mx-auto mt-2 object-contain rounded-md" style="display: none;" />
+                        <p id="image-upload-status" class="text-sm mt-2"></p>
+                    </div>
+
                     <div>
                         <label for="product-additional-images" class="block text-sm font-medium text-gray-700">URLs de Imagens Adicionais (separadas por vírgula):</label>
                         <textarea id="product-additional-images" rows="2" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
@@ -96,6 +105,15 @@
                 </form>
             </div>
 
+            <!-- Seção de Busca de Produtos -->
+            <div class="mb-6 p-6 border border-border rounded-lg shadow-sm">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Buscar Produtos</h3>
+                <div>
+                    <label for="search-input" class="block text-sm font-medium text-gray-700">Buscar por Nome ou Descrição:</label>
+                    <input type="text" id="search-input" class="mt-1 block w-full border border-border rounded-md shadow-sm p-2 focus:ring-primary focus:border-primary" placeholder="Digite o nome ou descrição do produto..." />
+                </div>
+            </div>
+
             <!-- Lista de Produtos Existentes -->
             <div class="p-6 border border-border rounded-lg shadow-sm">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Produtos Cadastrados</h3>
@@ -104,8 +122,6 @@
                     <!-- Produtos serão carregados aqui -->
                 </div>
             </div>
-
-            <button id="logout-button" class="mt-6 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors duration-300 font-semibold">Sair</button>
         </section>
     </main>
 
@@ -122,6 +138,7 @@
         // --- Configuração do Supabase ---
         const SUPABASE_URL = 'https://euipmrgkumsrdumglfmx.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1aXBtcmdrdW1zcmR1bWdsZm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwODY0NTksImV4cCI6MjA2ODY2MjQ1OX0.1tEJpbPxKuvo10QxLpFnOD5B0ZRKhe5Z_4RiLiWu9fM';         
+        const SUPABASE_STORAGE_BUCKET = 'product-images'; // Nome do seu bucket no Supabase Storage
 
         let supabase; // Declara a variável supabase aqui
 
@@ -131,13 +148,16 @@
         messageDiv.className = 'mt-4 p-3 text-sm rounded-md';
         messageDiv.style.display = 'none';
 
+        // Variável para armazenar todos os produtos carregados
+        let allProducts = [];
+
         // Evento de carregamento do DOM para inicializar Supabase e carregar produtos
         document.addEventListener('DOMContentLoaded', () => {
             // Adicione a messageDiv ao DOM assim que o DOM estiver carregado
             document.querySelector('main').prepend(messageDiv);
 
             // Inicialize o cliente Supabase aqui, dentro do DOMContentLoaded
-            // Esta é a forma mais robusta de garantir que Supabase esteja definido.
+            // Isso garante que o objeto Supabase esteja disponível.
             supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
             // --- Referências aos Elementos HTML de Gerenciamento de Produtos ---
@@ -156,9 +176,14 @@
             const productListDiv = document.getElementById('product-list');
             const noProductsMessage = document.getElementById('no-products-message');
             
-            // Botão de Logout (simplificado, apenas recarrega a página)
-            const logoutButton = document.getElementById('logout-button');
+            // Referências para os novos elementos de Drag and Drop
+            const imageDropZone = document.getElementById('image-drop-zone');
+            const fileInput = document.getElementById('file-input');
+            const imagePreview = document.getElementById('image-preview');
+            const imageUploadStatus = document.getElementById('image-upload-status');
 
+            // Referência para o campo de busca
+            const searchInput = document.getElementById('search-input');
 
             // --- Funções Auxiliares ---
             function showMessage(msg, type = 'info') {
@@ -173,6 +198,132 @@
                     messageDiv.classList.add('bg-blue-100', 'text-blue-800');
                 }
             }
+
+            // Função para fazer upload de imagem para o Supabase Storage
+            async function uploadImageToSupabase(file) {
+                const filePath = `${Date.now()}-${file.name}`; // Nome único para o arquivo
+                imageUploadStatus.textContent = `Enviando ${file.name}...`;
+                imageUploadStatus.classList.remove('text-red-800', 'text-green-800');
+                imageUploadStatus.classList.add('text-blue-800');
+
+                const { data, error } = await supabase.storage
+                    .from(SUPABASE_STORAGE_BUCKET)
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: false // Não sobrescrever se o arquivo já existir
+                    });
+
+                if (error) {
+                    console.error('Erro ao fazer upload da imagem:', error);
+                    imageUploadStatus.textContent = `Erro ao enviar ${file.name}: ${error.message}`;
+                    imageUploadStatus.classList.remove('text-blue-800');
+                    imageUploadStatus.classList.add('text-red-800');
+                    return null;
+                }
+
+                // Obter a URL pública do arquivo
+                const { data: publicUrlData } = supabase.storage
+                    .from(SUPABASE_STORAGE_BUCKET)
+                    .getPublicUrl(filePath);
+
+                if (publicUrlData && publicUrlData.publicUrl) {
+                    imageUploadStatus.textContent = `${file.name} enviado com sucesso!`;
+                    imageUploadStatus.classList.remove('text-blue-800', 'text-red-800');
+                    imageUploadStatus.classList.add('text-green-800');
+                    return publicUrlData.publicUrl;
+                } else {
+                    console.error('Erro ao obter URL pública da imagem:', publicUrlData);
+                    imageUploadStatus.textContent = `Erro ao obter URL pública para ${file.name}.`;
+                    imageUploadStatus.classList.remove('text-blue-800');
+                    imageUploadStatus.classList.add('text-red-800');
+                    return null;
+                }
+            }
+
+            // --- Lógica de Drag and Drop ---
+            imageDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault(); // Previne o comportamento padrão (abrir arquivo no navegador)
+                imageDropZone.classList.add('border-primary'); // Feedback visual
+            });
+
+            imageDropZone.addEventListener('dragleave', (e) => {
+                imageDropZone.classList.remove('border-primary'); // Remove feedback visual
+            });
+
+            imageDropZone.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                imageDropZone.classList.remove('border-primary');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    let mainImageUploaded = false;
+                    let additionalImageUrls = [];
+
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        if (file.type.startsWith('image/')) {
+                            const imageUrl = await uploadImageToSupabase(file);
+                            if (imageUrl) {
+                                if (!mainImageUploaded) {
+                                    productImageUrlInput.value = imageUrl;
+                                    imagePreview.src = imageUrl;
+                                    imagePreview.style.display = 'block';
+                                    mainImageUploaded = true;
+                                } else {
+                                    additionalImageUrls.push(imageUrl);
+                                }
+                            }
+                        } else {
+                            showMessage(`Arquivo "${file.name}" não é uma imagem e foi ignorado.`, 'error');
+                        }
+                    }
+
+                    // Adiciona as URLs de imagens adicionais ao campo, mantendo as existentes se houver
+                    if (additionalImageUrls.length > 0) {
+                        const currentAdditionalImages = productAdditionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
+                        productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
+                    }
+                }
+            });
+
+            // Lidar com a seleção de arquivos por clique
+            imageDropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', async (e) => {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    let mainImageUploaded = false;
+                    let additionalImageUrls = [];
+
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        if (file.type.startsWith('image/')) {
+                            const imageUrl = await uploadImageToSupabase(file);
+                            if (imageUrl) {
+                                if (!mainImageUploaded) {
+                                    productImageUrlInput.value = imageUrl;
+                                    imagePreview.src = imageUrl;
+                                    imagePreview.style.display = 'block';
+                                    mainImageUploaded = true;
+                                } else {
+                                    additionalImageUrls.push(imageUrl);
+                                }
+                            }
+                        } else {
+                            showMessage(`Arquivo "${file.name}" não é uma imagem e foi ignorado.`, 'error');
+                        }
+                    }
+
+                    // Adiciona as URLs de imagens adicionais ao campo, mantendo as existentes se houver
+                    if (additionalImageUrls.length > 0) {
+                        const currentAdditionalImages = productAdditionalImagesInput.value.split(',').map(url => url.trim()).filter(url => url !== '');
+                        productAdditionalImagesInput.value = [...currentAdditionalImages, ...additionalImageUrls].join(', ');
+                    }
+                }
+            });
+
 
             // --- Lógica de Gerenciamento de Produtos ---
 
@@ -192,13 +343,20 @@
                     return;
                 }
 
-                if (products.length === 0) {
+                allProducts = products; // Armazena todos os produtos carregados
+                displayProducts(allProducts); // Exibe todos os produtos inicialmente
+            }
+
+            // Função para exibir produtos (usada por loadProducts e searchProducts)
+            function displayProducts(productsToDisplay) {
+                productListDiv.innerHTML = ''; // Limpa a lista
+                if (productsToDisplay.length === 0) {
                     noProductsMessage.style.display = 'block';
                     productListDiv.appendChild(noProductsMessage);
                     return;
                 }
 
-                products.forEach(product => {
+                productsToDisplay.forEach(product => {
                     const productCard = `
                         <div class="product-item bg-gray-50 p-4 rounded-md shadow-sm flex items-center justify-between">
                             <div>
@@ -224,6 +382,23 @@
                 });
             }
 
+            // Função para buscar produtos
+            function searchProducts() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                if (searchTerm === '') {
+                    displayProducts(allProducts); // Se a busca estiver vazia, exibe todos os produtos
+                    return;
+                }
+
+                const filteredProducts = allProducts.filter(product => {
+                    const productName = product.name ? product.name.toLowerCase() : '';
+                    const productDescription = product.description ? product.description.toLowerCase() : '';
+                    return productName.includes(searchTerm) || productDescription.includes(searchTerm);
+                });
+                displayProducts(filteredProducts);
+            }
+
+
             // Função para preencher o formulário com dados de um produto para edição
             async function editProduct(event) {
                 const productId = event.target.dataset.id;
@@ -247,6 +422,16 @@
                 productCategorySelect.value = product.category;
                 productSupplierLinkInput.value = product.supplierLink;
                 productImageUrlInput.value = product.imageUrl;
+                
+                // Exibe a pré-visualização da imagem principal se houver URL
+                if (product.imageUrl) {
+                    imagePreview.src = product.imageUrl;
+                    imagePreview.style.display = 'block';
+                } else {
+                    imagePreview.src = '';
+                    imagePreview.style.display = 'none';
+                }
+
                 // Converte o array de imagens adicionais para string separada por vírgula
                 productAdditionalImagesInput.value = product.additionalImages ? product.additionalImages.join(', ') : '';
 
@@ -263,6 +448,9 @@
                 productFormTitle.textContent = 'Adicionar Novo Produto';
                 submitProductBtn.textContent = 'Salvar Produto';
                 cancelEditBtn.style.display = 'none';
+                imagePreview.src = ''; // Limpa a pré-visualização da imagem
+                imagePreview.style.display = 'none';
+                imageUploadStatus.textContent = ''; // Limpa o status de upload
                 showMessage('Formulário pronto para adicionar novo produto.', 'info');
             });
 
@@ -359,15 +547,15 @@
                     productFormTitle.textContent = 'Adicionar Novo Produto';
                     submitProductBtn.textContent = 'Salvar Produto';
                     cancelEditBtn.style.display = 'none';
+                    imagePreview.src = ''; // Limpa a pré-visualização da imagem
+                    imagePreview.style.display = 'none';
+                    imageUploadStatus.textContent = ''; // Limpa o status de upload
                     loadProducts(); // Recarrega a lista de produtos
                 }
             });
 
-            // Adiciona listener para o botão de logout
-            logoutButton.addEventListener('click', () => {
-                // Simplesmente recarrega a página, já que não há sessão para "sair"
-                window.location.reload();
-            });
+            // Adiciona o listener para o campo de busca
+            searchInput.addEventListener('keyup', searchProducts);
 
             // Carrega os produtos quando o DOM estiver completamente carregado
             loadProducts();
